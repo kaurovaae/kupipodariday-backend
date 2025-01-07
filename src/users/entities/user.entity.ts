@@ -50,10 +50,10 @@ export class User {
   @Column()
   password: string; // пароль пользователя
 
-  @OneToMany(() => Wish, (wish) => wish.owner)
+  @OneToMany(() => Wish, (wish) => wish.id)
   wishes: Wish[]; // список желаемых подарков
 
-  @OneToMany(() => Offer, (offer) => offer.user)
+  @OneToMany(() => Offer, (offer) => offer.id)
   offers: Offer[]; // содержит список подарков, на которые скидывается пользователь
 
   @OneToMany(() => WishList, (wishList) => wishList.id)

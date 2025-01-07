@@ -10,12 +10,10 @@ import {
 import { IsDecimal, IsInt, IsUrl, Min, Max } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
-import { WishList } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
   @PrimaryGeneratedColumn()
-  @ManyToOne(() => WishList, (wishlist) => wishlist.items)
   id: number; // уникальный числовой идентификатор
 
   @CreateDateColumn()
@@ -44,7 +42,7 @@ export class Wish {
   @IsDecimal({ decimal_digits: '2' })
   raised: number; // сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок
 
-  @ManyToOne(() => User, (user) => user.wishes)
+  @ManyToOne(() => User, (user) => user.id)
   owner: User; // ссылка на пользователя, который добавил пожелание подарка
 
   @Column()
@@ -52,7 +50,7 @@ export class Wish {
   @Max(1024)
   description: string; // строка с описанием подарка
 
-  @OneToMany(() => Offer, (offer) => offer.item)
+  @OneToMany(() => Offer, (offer) => offer.id)
   offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей
 
   @Column()
