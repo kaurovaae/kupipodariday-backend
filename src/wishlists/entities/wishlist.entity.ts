@@ -35,5 +35,5 @@ export class WishList {
   image: string; // обложка для подборки
 
   @OneToMany(() => Wish, (wish) => wish.id)
-  items: Wish[]; // содержит набор ссылок на подарки
+  items: number[]; // содержит набор ссылок на подарки
 }

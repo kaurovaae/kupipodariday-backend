@@ -51,11 +51,11 @@ export class User {
   password: string; // пароль пользователя
 
   @OneToMany(() => Wish, (wish) => wish.id)
-  wishes: Wish[]; // список желаемых подарков
+  wishes: number[]; // список желаемых подарков
 
   @OneToMany(() => Offer, (offer) => offer.id)
-  offers: Offer[]; // содержит список подарков, на которые скидывается пользователь
+  offers: number[]; // содержит список подарков, на которые скидывается пользователь
 
   @OneToMany(() => WishList, (wishList) => wishList.id)
-  wishlists: WishList[]; // содержит список вишлистов, которые создал пользователь
+  wishlists: number[]; // содержит список вишлистов, которые создал пользователь
 }
