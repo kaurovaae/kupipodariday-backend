@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
 } from '@nestjs/common';
+import bcrypt from 'bcrypt';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,8 +25,14 @@ export class UsersController {
   }
 
   @Post()
-  create(@Body() user: CreateUserDto): Promise<User> {
-    return this.usersService.create(user);
+  async create(@Body() user: CreateUserDto): Promise<User> {
+    const { password, ...rest } = user;
+    const hash = await bcrypt.hash(password, 10);
+
+    return this.usersService.create({
+      ...rest,
+      password: hash,
+    });
   }
 
   @Delete(':id')

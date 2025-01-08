@@ -3,6 +3,8 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { LocalGuard } from '../guards/local.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import { ServerException } from '../exceptions/server.exception';
+import { ErrorCode } from '../exceptions/error-codes';
 
 @Controller('auth')
 export class AuthController {
@@ -24,6 +26,10 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
+    if (await this.usersService.findByUsername(createUserDto.username)) {
+      throw new ServerException(ErrorCode.UserAlreadyExists);
+    }
+
     /* При регистрации создаём пользователя и генерируем для него токен */
     const user = await this.usersService.create(createUserDto);
 
