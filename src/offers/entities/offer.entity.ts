@@ -25,7 +25,7 @@ export class Offer {
   user: number; // id желающего скинуться
 
   @ManyToOne(() => Wish, (wish) => wish.id)
-  item: Wish; // ссылка на товар
+  item: number; // ссылка на товар
 
   @Column()
   @IsDecimal({ decimal_digits: '2' })
