@@ -30,7 +30,7 @@ export class OffersController {
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const offer = await this.offersService.findById(id);
+    const offer = await this.offersService.findOne(id);
     if (!offer) {
       throw new NotFoundException();
     }
@@ -42,7 +42,7 @@ export class OffersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOfferDto: UpdateOfferDto,
   ) {
-    const offer = await this.offersService.findById(id);
+    const offer = await this.offersService.findOne(id);
     if (!offer) {
       throw new NotFoundException();
     }

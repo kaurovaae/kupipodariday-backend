@@ -16,7 +16,7 @@ export class WishesService {
     return this.wishesRepository.find();
   }
 
-  async findById(id: number): Promise<Wish> {
+  async findOne(id: number): Promise<Wish> {
     return this.wishesRepository.findOneBy({ id });
   }
 

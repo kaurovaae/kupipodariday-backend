@@ -1,11 +1,13 @@
 import { IsBoolean, IsDecimal, IsInt, IsOptional } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
+import { Wish } from '../../wishes/entities/wish.entity';
 
 export class UpdateOfferDto {
   @IsInt()
-  user: number;
+  user: User;
 
   @IsInt()
-  item: number;
+  item: Wish;
 
   @IsDecimal({ decimal_digits: '2' })
   amount: number;

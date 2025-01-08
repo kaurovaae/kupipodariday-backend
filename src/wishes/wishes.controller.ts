@@ -30,7 +30,7 @@ export class WishesController {
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const wish = await this.wishesService.findById(id);
+    const wish = await this.wishesService.findOne(id);
     if (!wish) {
       throw new NotFoundException();
     }
@@ -42,7 +42,7 @@ export class WishesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    const wish = await this.wishesService.findById(id);
+    const wish = await this.wishesService.findOne(id);
     if (!wish) {
       throw new NotFoundException();
     }

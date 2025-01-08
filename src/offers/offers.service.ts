@@ -16,7 +16,7 @@ export class OffersService {
     return this.offersRepository.find();
   }
 
-  async findById(id: number): Promise<Offer> {
+  async findOne(id: number): Promise<Offer> {
     return this.offersRepository.findOneBy({ id });
   }
 

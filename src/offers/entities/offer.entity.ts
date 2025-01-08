@@ -21,11 +21,11 @@ export class Offer {
   @UpdateDateColumn()
   updatedAt: Date; // дата изменения
 
-  @ManyToOne(() => User, (user) => user.id)
-  user: number; // id желающего скинуться
+  @ManyToOne(() => User, (user) => user.offers)
+  user: User; // id желающего скинуться
 
-  @ManyToOne(() => Wish, (wish) => wish.id)
-  item: number; // ссылка на товар
+  @ManyToOne(() => Wish, (wish) => wish.offers)
+  item: Wish; // ссылка на товар
 
   @Column()
   @IsDecimal({ decimal_digits: '2' })

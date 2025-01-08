@@ -5,8 +5,9 @@ import {
   MinLength,
   MaxLength,
 } from 'class-validator';
+import { Wish } from '../../wishes/entities/wish.entity';
 
-export class CreateWishListDto {
+export class CreateWishlistDto {
   @IsString()
   @MinLength(1)
   @MaxLength(250)
@@ -21,5 +22,5 @@ export class CreateWishListDto {
   image: string;
 
   @IsArray()
-  items: number[];
+  items: Wish[];
 }

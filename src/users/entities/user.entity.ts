@@ -9,7 +9,7 @@ import {
 import { IsEmail, Min, Max } from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
-import { WishList } from '../../wishlists/entities/wishlist.entity';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class User {
@@ -50,12 +50,12 @@ export class User {
   @Column()
   password: string; // пароль пользователя
 
-  @OneToMany(() => Wish, (wish) => wish.id)
-  wishes: number[]; // список желаемых подарков
+  @OneToMany(() => Wish, (wish) => wish.owner)
+  wishes: Wish[]; // список желаемых подарков
 
-  @OneToMany(() => Offer, (offer) => offer.id)
-  offers: number[]; // содержит список подарков, на которые скидывается пользователь
+  @OneToMany(() => Offer, (offer) => offer.user)
+  offers: Offer[]; // содержит список подарков, на которые скидывается пользователь
 
-  @OneToMany(() => WishList, (wishList) => wishList.id)
-  wishlists: number[]; // содержит список вишлистов, которые создал пользователь
+  @OneToMany(() => Wishlist, (wishlist) => wishlist.owner)
+  wishlists: Wishlist[]; // содержит список вишлистов, которые создал пользователь
 }

@@ -12,9 +12,8 @@ import { Wish } from '../../wishes/entities/wish.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity()
-export class WishList {
+export class Wishlist {
   @PrimaryGeneratedColumn()
-  @ManyToOne(() => User, (user) => user.id)
   id: number; // уникальный числовой идентификатор
 
   @CreateDateColumn()
@@ -36,6 +35,9 @@ export class WishList {
   @Column()
   image: string; // обложка для подборки
 
+  @ManyToOne(() => User, (user) => user.wishlists)
+  owner: User; // ссылка на пользователя, который добавил список пожеланий
+
   @OneToMany(() => Wish, (wish) => wish.id)
-  items: number[]; // содержит набор ссылок на подарки
+  items: Wish[]; // содержит набор ссылок на подарки
 }

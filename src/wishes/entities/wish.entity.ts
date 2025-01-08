@@ -42,16 +42,16 @@ export class Wish {
   @IsDecimal({ decimal_digits: '2' })
   raised: number; // сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок
 
-  @ManyToOne(() => User, (user) => user.id)
-  owner: number; // ссылка на пользователя, который добавил пожелание подарка
+  @ManyToOne(() => User, (user) => user.wishes)
+  owner: User; // ссылка на пользователя, который добавил пожелание подарка
 
   @Column()
   @Min(1)
   @Max(1024)
   description: string; // строка с описанием подарка
 
-  @OneToMany(() => Offer, (offer) => offer.id)
-  offers: number[]; // массив ссылок на заявки скинуться от других пользователей
+  @OneToMany(() => Offer, (offer) => offer.item)
+  offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей
 
   @Column()
   @IsInt()

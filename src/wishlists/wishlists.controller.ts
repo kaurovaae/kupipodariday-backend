@@ -9,29 +9,29 @@ import {
   ParseIntPipe,
   Patch,
 } from '@nestjs/common';
-import { WishListsService } from './wishlists.service';
-import { WishList } from './entities/wishlist.entity';
-import { CreateWishListDto } from './dto/create-wish-list.dto';
-import { UpdateWishListDto } from './dto/update-wish-list.dto';
+import { WishlistsService } from './wishlists.service';
+import { Wishlist } from './entities/wishlist.entity';
+import { CreateWishlistDto } from './dto/create-wishlist.dto';
+import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 
 @Controller('wishlists')
-export class WishListsController {
-  constructor(private wishlistsService: WishListsService) {}
+export class WishlistsController {
+  constructor(private wishlistsService: WishlistsService) {}
 
   @Get()
-  findAll(): Promise<WishList[]> {
+  findAll(): Promise<Wishlist[]> {
     return this.wishlistsService.findAll();
   }
 
   @Post()
-  create(@Body() wishlist: CreateWishListDto): Promise<WishList> {
+  create(@Body() wishlist: CreateWishlistDto): Promise<Wishlist> {
     return this.wishlistsService.create(wishlist);
   }
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const wishList = await this.wishlistsService.findById(id);
-    if (!wishList) {
+    const wishlist = await this.wishlistsService.findOne(id);
+    if (!wishlist) {
       throw new NotFoundException();
     }
     await this.wishlistsService.removeById(id);
@@ -40,12 +40,12 @@ export class WishListsController {
   @Patch(':id')
   async updateById(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateWishListDto: UpdateWishListDto,
+    @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishList = await this.wishlistsService.findById(id);
-    if (!wishList) {
+    const wishlist = await this.wishlistsService.findOne(id);
+    if (!wishlist) {
       throw new NotFoundException();
     }
-    await this.wishlistsService.updateById(id, updateWishListDto);
+    await this.wishlistsService.updateById(id, updateWishlistDto);
   }
 }

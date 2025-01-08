@@ -30,7 +30,7 @@ export class UsersController {
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException();
     }
@@ -42,7 +42,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException();
     }
