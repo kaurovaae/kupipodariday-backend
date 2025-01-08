@@ -1,12 +1,13 @@
 import {
   Column,
   CreateDateColumn,
-  Entity, ManyToOne,
+  Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Min, Max } from 'class-validator';
+import { IsOptional, Min, Max } from 'class-validator';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -28,6 +29,7 @@ export class WishList {
   name: string; // название списка
 
   @Column()
+  @IsOptional()
   @Max(1500)
   description: string; // описание подборки
 
