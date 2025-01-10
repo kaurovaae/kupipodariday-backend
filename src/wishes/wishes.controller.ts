@@ -18,16 +18,6 @@ import { UpdateWishDto } from './dto/update-wish.dto';
 export class WishesController {
   constructor(private wishesService: WishesService) {}
 
-  @Get()
-  findAll(): Promise<Wish[]> {
-    return this.wishesService.findAll();
-  }
-
-  @Post()
-  create(@Body() wish: CreateWishDto): Promise<Wish> {
-    return this.wishesService.create(wish);
-  }
-
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
     const wish = await this.wishesService.findOne(id);
@@ -47,5 +37,15 @@ export class WishesController {
       throw new NotFoundException();
     }
     await this.wishesService.updateById(id, updateWishDto);
+  }
+
+  @Get()
+  findAll(): Promise<Wish[]> {
+    return this.wishesService.findAll();
+  }
+
+  @Post()
+  create(@Body() wish: CreateWishDto): Promise<Wish> {
+    return this.wishesService.create(wish);
   }
 }

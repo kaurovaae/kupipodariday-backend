@@ -8,28 +8,39 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
-import bcrypt from 'bcrypt';
+import { Request } from 'express';
+import * as bcrypt from 'bcrypt';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtGuard } from '../guards/jwt.guard';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get()
-  findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  @UseGuards(JwtGuard)
+  @Get('me')
+  async getUserInfo(@Req() req: Request & { user: User }) {
+    /* Исключаем пароль из результата */
+    const { password, ...rest } = req.user;
+    return rest;
   }
 
-  @Post()
-  async create(@Body() user: CreateUserDto): Promise<User> {
-    const { password, ...rest } = user;
+  @UseGuards(JwtGuard)
+  @Patch('me')
+  async updateUserInfo(
+    @Req() req: Request & { user: User },
+    @Body() body: UpdateUserDto,
+  ) {
+    const { password, ...rest } = body;
     const hash = await bcrypt.hash(password, 10);
 
-    return this.usersService.create({
+    await this.usersService.updateById(req.user.id, {
       ...rest,
       password: hash,
     });
@@ -54,5 +65,21 @@ export class UsersController {
       throw new NotFoundException();
     }
     await this.usersService.updateById(id, updateUserDto);
+  }
+
+  @Get()
+  findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
+
+  @Post()
+  async create(@Body() user: CreateUserDto): Promise<User> {
+    const { password, ...rest } = user;
+    const hash = await bcrypt.hash(password, 10);
+
+    return this.usersService.create({
+      ...rest,
+      password: hash,
+    });
   }
 }

@@ -18,16 +18,6 @@ import { UpdateOfferDto } from './dto/update-offer.dto';
 export class OffersController {
   constructor(private offersService: OffersService) {}
 
-  @Get()
-  findAll(): Promise<Offer[]> {
-    return this.offersService.findAll();
-  }
-
-  @Post()
-  create(@Body() offer: CreateOfferDto): Promise<Offer> {
-    return this.offersService.create(offer);
-  }
-
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
     const offer = await this.offersService.findOne(id);
@@ -47,5 +37,15 @@ export class OffersController {
       throw new NotFoundException();
     }
     await this.offersService.updateById(id, updateOfferDto);
+  }
+
+  @Get()
+  findAll(): Promise<Offer[]> {
+    return this.offersService.findAll();
+  }
+
+  @Post()
+  create(@Body() offer: CreateOfferDto): Promise<Offer> {
+    return this.offersService.create(offer);
   }
 }

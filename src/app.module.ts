@@ -11,8 +11,6 @@ import { Offer } from './offers/entities/offer.entity';
 import { User } from './users/entities/user.entity';
 import { Wish } from './wishes/entities/wish.entity';
 import { Wishlist } from './wishlists/entities/wishlist.entity';
-import { ProfileController } from './profile/profile.controller';
-import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -32,9 +30,8 @@ import { ProfileModule } from './profile/profile.module';
     WishlistsModule,
     OffersModule,
     AuthModule,
-    ProfileModule,
   ],
-  controllers: [AppController, ProfileController],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule {}
