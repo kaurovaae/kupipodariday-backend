@@ -24,7 +24,7 @@ export class AuthController {
   @Post('signin')
   signin(
     @Body() signinUserDto: SigninUserDto,
-    @Req() req, // TODO: remove
+    @Req() req,
   ): SigninUserResponseDto {
     /* Генерируем для пользователя JWT-токен */
     return this.authService.auth(req.user);

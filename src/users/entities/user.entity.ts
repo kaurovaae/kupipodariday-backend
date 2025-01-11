@@ -45,7 +45,7 @@ export class User {
 
   @ApiProperty({
     description: 'Аватар пользователя',
-    example: 'https://i.pravatar.cc/300'
+    example: 'https://i.pravatar.cc/300',
   })
   @IsUrl()
   @IsOptional()

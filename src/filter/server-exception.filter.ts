@@ -15,7 +15,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
 
     const ctx = host.switchToHttp();
 
-    const request = ctx.getRequest();
+    // const request = ctx.getRequest();
     const response = ctx.getResponse();
 
     // меняем объект ответа

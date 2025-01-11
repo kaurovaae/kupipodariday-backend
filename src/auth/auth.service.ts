@@ -22,7 +22,7 @@ export class AuthService {
     const match = await bcrypt.compare(password, user && user.password);
     if (match) {
       /* Исключаем пароль из результата */
-      const { password, ...rest } = user;
+      const { password: _, ...rest } = user;
 
       return rest;
     }

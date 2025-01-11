@@ -16,7 +16,8 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiExtraModels, ApiParam,
+  ApiExtraModels,
+  ApiParam,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
