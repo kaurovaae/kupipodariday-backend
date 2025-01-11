@@ -4,16 +4,18 @@ import {
   Delete,
   Get,
   NotFoundException,
-  Post,
   Param,
   ParseIntPipe,
   Patch,
+  Post,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { WishlistsService } from './wishlists.service';
-import { Wishlist } from './entities/wishlist.entity';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Wishlist } from './entities/wishlist.entity';
 
+@ApiTags('wishlists')
 @Controller('wishlists')
 export class WishlistsController {
   constructor(private wishlistsService: WishlistsService) {}

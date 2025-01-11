@@ -4,16 +4,18 @@ import {
   Delete,
   Get,
   NotFoundException,
-  Post,
   Param,
   ParseIntPipe,
   Patch,
+  Post,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { WishesService } from './wishes.service';
 import { Wish } from './entities/wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 
+@ApiTags('wishes')
 @Controller('wishes')
 export class WishesController {
   constructor(private wishesService: WishesService) {}

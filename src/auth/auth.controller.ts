@@ -1,12 +1,15 @@
-import { Controller, Post, UseGuards, Req, Body } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LocalGuard } from '../guards/local.guard';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
+import { LocalGuard } from '../guards/local.guard';
+import { UsersService } from '../users/users.service';
+import { ServerException } from '../exceptions/server.exception';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { SigninUserDto, SigninUserResponseDto } from './dto/signin-user.dto';
 
-@Controller('auth')
+@ApiTags('auth')
+@Controller('')
 export class AuthController {
   constructor(
     private usersService: UsersService,
@@ -19,7 +22,10 @@ export class AuthController {
    */
   @UseGuards(LocalGuard)
   @Post('signin')
-  signin(@Req() req) {
+  signin(
+    @Body() signinUserDto: SigninUserDto,
+    @Req() req, // TODO: remove
+  ): SigninUserResponseDto {
     /* Генерируем для пользователя JWT-токен */
     return this.authService.auth(req.user);
   }

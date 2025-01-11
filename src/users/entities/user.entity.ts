@@ -6,49 +6,65 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IsEmail, Min, Max } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, IsUrl, IsOptional, Length } from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class User {
+  @ApiProperty({ description: 'Уникальный id пользователя' })
   @PrimaryGeneratedColumn()
-  id: number; // уникальный числовой идентификатор
+  id: number;
 
+  @ApiProperty({ description: 'Дата создания пользователя' })
   @CreateDateColumn()
-  createdAt: Date; // дата создания
+  createdAt: Date;
 
+  @ApiProperty({ description: 'Дата обновления пользователя' })
   @UpdateDateColumn()
-  updatedAt: Date; // дата изменения
+  updatedAt: Date;
 
+  @ApiProperty({ description: 'Имя пользователя', example: 'user' })
+  @IsString()
+  @Length(2, 30)
   @Column({
     unique: true,
   })
-  @Min(2)
-  @Max(30)
   username: string; // уникальное имя пользователя
 
+  @ApiProperty({ description: 'Описание пользователя', example: 'student' })
+  @IsString()
+  @IsOptional()
+  @Length(2, 200)
   @Column({
     default: 'Пока ничего не рассказал о себе',
   })
-  @Min(2)
-  @Max(200)
   about: string; // информация о пользователе
 
+  @ApiProperty({
+    description: 'Аватар пользователя',
+    example: 'https://i.pravatar.cc/300'
+  })
+  @IsUrl()
+  @IsOptional()
   @Column({
     default: 'https://i.pravatar.cc/300',
   })
   avatar: string; // ссылка на аватар
 
+  @ApiProperty({ description: 'Email пользователя', example: 'test@test.zone' })
+  @IsEmail()
   @Column({
     unique: true,
   })
-  @IsEmail()
   email: string; // уникальный адрес электронной почты пользователя
 
-  @Column()
-  password: string; // пароль пользователя
+  @ApiProperty({ description: 'Пароль пользователя', example: 'testpassword' })
+  @Column({ select: false })
+  @IsString()
+  password: string;
 
   @OneToMany(() => Wish, (wish) => wish.owner)
   wishes: Wish[]; // список желаемых подарков

@@ -1,6 +1,8 @@
 import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as path from 'path';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { OffersModule } from './offers/offers.module';
@@ -24,6 +26,10 @@ import { Wishlist } from './wishlists/entities/wishlist.entity';
       database: process.env.DATABASE_NAME,
       entities: [Offer, User, Wish, Wishlist],
       synchronize: true,
+    }),
+    ServeStaticModule.forRoot({
+      serveRoot: '/swagger',
+      rootPath: path.join(__dirname, '..', 'swagger'),
     }),
     UsersModule,
     WishesModule,

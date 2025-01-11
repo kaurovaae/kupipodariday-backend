@@ -1,6 +1,16 @@
-import { Controller, UseFilters } from '@nestjs/common';
-import { ServerExceptionFilter } from './filter/server-exception.filter';
+import { Controller, Get, Redirect } from '@nestjs/common';
+import { ApiExcludeController } from '@nestjs/swagger';
 
-@UseFilters(ServerExceptionFilter)
+@ApiExcludeController()
 @Controller()
-export class AppController {}
+export class AppController {
+  constructor() {
+    return;
+  }
+
+  @Get('')
+  @Redirect('/api')
+  index() {
+    return;
+  }
+}

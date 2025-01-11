@@ -13,7 +13,9 @@ import { OffersService } from './offers.service';
 import { Offer } from './entities/offer.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('offers')
 @Controller('offers')
 export class OffersController {
   constructor(private offersService: OffersService) {}
