@@ -13,7 +13,7 @@ import {
   IsUrl,
   IsString,
   Length,
-  // IsOptional,
+  IsOptional, IsDecimal,
 } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
@@ -61,7 +61,9 @@ export class Wish {
     description: 'Стоимость подарка',
     example: 1037.55,
   })
-  @Column('decimal')
+  @Column('decimal', {
+    scale: 2,
+  })
   @IsNumber({ maxDecimalPlaces: 2 })
   price: number;
 
@@ -70,7 +72,11 @@ export class Wish {
       'Сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок',
     example: 1037.55,
   })
-  @Column('decimal')
+  @Column('decimal', {
+    default: 0,
+    scale: 2,
+  })
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   raised: number;
 
