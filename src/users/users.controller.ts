@@ -45,7 +45,7 @@ export class UsersController {
   @UseGuards(JwtGuard)
   @ApiResponse({
     status: 200,
-    description: 'Возвращает пользователя по токену',
+    description: 'Возвращает список подарков пользователя',
     type: User,
   })
   @ApiUnauthorizedResponse({
@@ -98,15 +98,27 @@ export class UsersController {
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
+  @UseGuards(JwtGuard)
   @ApiParam({
     name: 'username',
     description: 'Имя пользователя',
     example: 'Иван',
   })
   @Get(':username')
-  findOne(@Param('username') username: string): Promise<User> {
+  findOne(@Param('username') username: string): Promise<FindUsersDto> {
     return this.usersService.findOne({
-      where: { username },
+      where: {
+        username,
+      },
+      select: {
+        id: true,
+        username: true,
+        avatar: true,
+        about: true,
+      },
+      relations: {
+        wishes: true,
+      },
     });
   }
 
