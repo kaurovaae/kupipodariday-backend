@@ -26,12 +26,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    */
   async validate(jwtPayload: { sub: number }) {
     /* В subject токена будем передавать идентификатор пользователя */
-    const user = this.usersService.findById(jwtPayload.sub);
+    const user = await this.usersService.findById(jwtPayload.sub);
 
     if (!user) {
       throw new ServerException(ErrorCode.Unauthorized);
     }
 
-    return user;
+    return { id: user.id };
   }
 }

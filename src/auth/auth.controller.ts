@@ -18,7 +18,7 @@ export class AuthController {
 
   /**
    * Стратегия local автоматически достанет username и password из тела запроса
-   * Если пароль будет верным, данные пользователя окажутся в объекте req.user
+   * Если пароль будет верным, id пользователя окажется в объекте req.user
    */
   @UseGuards(LocalGuard)
   @Post('signin')
@@ -27,18 +27,23 @@ export class AuthController {
     @Req() req,
   ): SigninUserResponseDto {
     /* Генерируем для пользователя JWT-токен */
-    return this.authService.auth(req.user);
+    return this.authService.auth(req.user.id);
   }
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
-    if (await this.usersService.findByUsername(createUserDto.username)) {
+    const isExists = await this.usersService.findOne({
+      where: {
+        username: createUserDto.username,
+      },
+    });
+    if (isExists) {
       throw new ServerException(ErrorCode.UserAlreadyExists);
     }
 
     /* При регистрации создаём пользователя и генерируем для него токен */
     const user = await this.usersService.create(createUserDto);
 
-    return this.authService.auth(user);
+    return this.authService.auth(user.id);
   }
 }

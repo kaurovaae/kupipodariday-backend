@@ -38,10 +38,6 @@ export class UsersService {
     return this.usersRepository.find(options);
   }
 
-  async findByUsername(username: string) {
-    return this.usersRepository.findOneBy({ username });
-  }
-
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, ...rest } = createUserDto;
     const hash = await bcrypt.hash(password, 10);
@@ -61,13 +57,13 @@ export class UsersService {
     updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {
     const { password, ...rest } = updateUserDto;
-    const hash = await bcrypt.hash(password, 10);
-
-    const user = {
-      ...rest,
-      password: hash,
-    };
-    await this.usersRepository.update({ id }, user);
+    if (password) {
+      const hash = await bcrypt.hash(password, 10);
+      const user = { ...rest, password: hash };
+      await this.usersRepository.update({ id }, user);
+    } else {
+      await this.usersRepository.update({ id }, updateUserDto);
+    }
 
     return this.findById(id);
   }

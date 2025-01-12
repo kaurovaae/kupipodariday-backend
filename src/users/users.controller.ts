@@ -72,11 +72,7 @@ export class UsersController {
     @Req() req: Request & { user: User },
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const { password: _, ...user } = await this.usersService.update(
-      req.user.id,
-      updateUserDto,
-    );
-    return user;
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
   @ApiParam({
