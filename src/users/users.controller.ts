@@ -28,6 +28,7 @@ import { NoValidUserResponseDto } from './dto/no-valid-user-response.dto';
 import { User } from './entities/user.entity';
 import { JwtGuard } from '../guards/jwt.guard';
 import { FindUsersDto } from './dto/find-users.dto';
+import { WishesService } from '../wishes/wishes.service';
 
 // const PAGE_SIZE = 10;
 
@@ -36,7 +37,29 @@ import { FindUsersDto } from './dto/find-users.dto';
 @ApiExtraModels(User)
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private wishesService: WishesService,
+  ) {}
+
+  @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает пользователя по токену',
+    type: User,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+    type: NoValidUserResponseDto,
+  })
+  @Get('me/wishes')
+  async getUserWishes(@Req() req: Request & { user: { id: number } }) {
+    return this.wishesService.findMany({
+      where: {
+        owner: req.user.id,
+      },
+    });
+  }
 
   @UseGuards(JwtGuard)
   @ApiResponse({
@@ -49,7 +72,7 @@ export class UsersController {
     type: NoValidUserResponseDto,
   })
   @Get('me')
-  async getUserInfo(@Req() req: Request & { user: User }) {
+  async getUserInfo(@Req() req: Request & { user: { id: number } }) {
     return this.usersService.findOne({
       where: {
         id: req.user.id,
@@ -69,7 +92,7 @@ export class UsersController {
   @UseGuards(JwtGuard)
   @Patch('me')
   async updateUserInfo(
-    @Req() req: Request & { user: User },
+    @Req() req: Request & { user: { id: number } },
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(req.user.id, updateUserDto);

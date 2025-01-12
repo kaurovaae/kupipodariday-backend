@@ -1,32 +1,10 @@
-import {
-  IsDecimal,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { OmitType } from '@nestjs/swagger';
+import { Wish } from '../entities/wish.entity';
 
-export class CreateWishDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(250)
-  name: string;
-
-  @IsString()
-  link: string;
-
-  @IsString()
-  @IsUrl()
-  image: string;
-
-  @IsDecimal({ decimal_digits: '2' })
-  price: number;
-
-  @IsDecimal({ decimal_digits: '2' })
-  raised: number;
-
-  @IsString()
-  @MinLength(1)
-  @MaxLength(1024)
-  description: string;
-}
+export class CreateWishDto extends OmitType(Wish, [
+  'id',
+  'createdAt',
+  'updatedAt',
+  'offers',
+  'copied',
+]) {}

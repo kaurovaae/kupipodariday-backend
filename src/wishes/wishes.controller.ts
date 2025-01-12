@@ -8,13 +8,24 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
+import {
+  ApiBearerAuth,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { WishesService } from './wishes.service';
 import { Wish } from './entities/wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
+import { JwtGuard } from '../guards/jwt.guard';
+import { NoValidWishResponseDto } from './dto/no-valid-wish-response.dto';
 
+@ApiBearerAuth()
 @ApiTags('wishes')
 @Controller('wishes')
 export class WishesController {
@@ -46,8 +57,24 @@ export class WishesController {
     return this.wishesService.findAll();
   }
 
+  @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: 201,
+    description: 'Возвращает созданный подарок',
+    type: Wish,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+    type: NoValidWishResponseDto,
+  })
   @Post()
-  create(@Body() wish: CreateWishDto): Promise<Wish> {
-    return this.wishesService.create(wish);
+  create(
+    @Req() req: Request & { user: { id: number } },
+    @Body() wish: CreateWishDto,
+  ): Promise<Wish> {
+    return this.wishesService.create({
+      ...wish,
+      owner: req.user.id,
+    });
   }
 }

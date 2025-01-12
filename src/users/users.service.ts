@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
+import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { FindUsersDto } from './dto/find-users.dto';
@@ -34,7 +35,7 @@ export class UsersService {
     return this.usersRepository.findOne(options);
   }
 
-  async findMany(options: FindOneOptions<User>): Promise<FindUsersDto[]> {
+  async findMany(options: FindManyOptions<User>): Promise<FindUsersDto[]> {
     return this.usersRepository.find(options);
   }
 
