@@ -5,7 +5,7 @@ import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { FindUsersDto } from './dto/find-users.dto';
+import { FindUserDto } from './dto/find-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
@@ -35,7 +35,7 @@ export class UsersService {
     return this.usersRepository.findOne(options);
   }
 
-  async findMany(options: FindManyOptions<User>): Promise<FindUsersDto[]> {
+  async findMany(options: FindManyOptions<User>): Promise<FindUserDto[]> {
     return this.usersRepository.find(options);
   }
 

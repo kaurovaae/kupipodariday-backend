@@ -2,17 +2,13 @@ import { Request } from 'express';
 import {
   Body,
   Controller,
-  // Delete,
   Get,
-  // NotFoundException,
   Param,
-  // ParseIntPipe,
   Patch,
   Post,
-  // Query,
+  Query,
   Req,
   UseGuards,
-  HttpCode,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,15 +25,18 @@ import { User } from './entities/user.entity';
 import { Wish } from '../wishes/entities/wish.entity';
 import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
-import { FindUsersDto } from './dto/find-users.dto';
+import { FindUserDto } from './dto/find-user.dto';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
-
-// const PAGE_SIZE = 10;
 
 @ApiBearerAuth()
 @ApiTags('users')
 @ApiExtraModels(User)
+@UseGuards(JwtGuard)
+@ApiUnauthorizedResponse({
+  description: 'Unauthorized',
+  type: NoValidUserResponseDto,
+})
 @Controller('users')
 export class UsersController {
   constructor(
@@ -45,15 +44,10 @@ export class UsersController {
     private wishesService: WishesService,
   ) {}
 
-  @UseGuards(JwtGuard)
   @ApiResponse({
     status: 200,
     description: 'Возвращает список подарков пользователя',
     type: [Wish],
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    type: NoValidUserResponseDto,
   })
   @Get('me/wishes')
   async getMyWishes(@Req() req: Request & { user: { id: number } }) {
@@ -76,15 +70,10 @@ export class UsersController {
     });
   }
 
-  @UseGuards(JwtGuard)
   @ApiResponse({
     status: 200,
     description: 'Возвращает список подарков пользователя с заданным username',
     type: [Wish],
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    type: NoValidUserResponseDto,
   })
   @Get(':username/wishes')
   async getUserWishes(@Param('username') username: string) {
@@ -107,15 +96,10 @@ export class UsersController {
     });
   }
 
-  @UseGuards(JwtGuard)
   @ApiResponse({
     status: 200,
     description: 'Возвращает пользователя по токену',
     type: User,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    type: NoValidUserResponseDto,
   })
   @Get('me')
   async getUserInfo(@Req() req: Request & { user: { id: number } }) {
@@ -135,15 +119,10 @@ export class UsersController {
     });
   }
 
-  @UseGuards(JwtGuard)
   @ApiResponse({
     status: 200,
     description: 'Обновляет данные пользователя',
     type: User,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    type: NoValidUserResponseDto,
   })
   @Patch('me')
   async updateUserInfo(
@@ -153,15 +132,10 @@ export class UsersController {
     return this.usersService.update(req.user.id, updateUserDto);
   }
 
-  @UseGuards(JwtGuard)
   @ApiResponse({
     status: 200,
     description: 'Возвращает пользователя с указанным username',
     type: User,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    type: NoValidUserResponseDto,
   })
   @ApiParam({
     name: 'username',
@@ -169,7 +143,7 @@ export class UsersController {
     example: 'Иван',
   })
   @Get(':username')
-  findOne(@Param('username') username: string): Promise<FindUsersDto> {
+  findOne(@Param('username') username: string): Promise<FindUserDto> {
     return this.usersService.findOne({
       where: {
         username,
@@ -186,11 +160,21 @@ export class UsersController {
     });
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает пользователя с указанными email или username',
+    type: User,
+  })
+  @ApiParam({
+    name: 'query',
+    description: 'Имя или email пользователя',
+    example: 'Иван',
+  })
   @Post('find')
-  @HttpCode(200)
-  async findMany(@Body() findUsersDto: FindUsersDto): Promise<FindUsersDto[]> {
-    const { email, username } = findUsersDto;
-    return this.usersService.findMany({ where: [{ email }, { username }] });
+  async findMany(@Query('query') query: string): Promise<FindUserDto> {
+    return this.usersService.findOne({
+      where: [{ email: query }, { username: query }],
+    });
   }
 
   // @Post('findByOffset')
