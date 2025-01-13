@@ -13,7 +13,7 @@ import {
   IsUrl,
   IsString,
   Length,
-  IsOptional, IsDecimal,
+  IsOptional,
 } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
@@ -81,7 +81,7 @@ export class Wish {
   raised: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
-  owner: number; // ссылка на пользователя, который добавил пожелание подарка
+  owner: User; // ссылка на пользователя, который добавил пожелание подарка
 
   @ApiProperty({
     description: 'Описание подарка',

@@ -26,9 +26,12 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NoValidUserResponseDto } from './dto/no-valid-user-response.dto';
 import { User } from './entities/user.entity';
+import { Wish } from '../wishes/entities/wish.entity';
+import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
 import { FindUsersDto } from './dto/find-users.dto';
-import { WishesService } from '../wishes/wishes.service';
+import { ServerException } from '../exceptions/server.exception';
+import { ErrorCode } from '../exceptions/error-codes';
 
 // const PAGE_SIZE = 10;
 
@@ -46,17 +49,61 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Возвращает список подарков пользователя',
-    type: User,
+    type: [Wish],
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized',
     type: NoValidUserResponseDto,
   })
   @Get('me/wishes')
-  async getUserWishes(@Req() req: Request & { user: { id: number } }) {
+  async getMyWishes(@Req() req: Request & { user: { id: number } }) {
+    const user = await this.usersService.findOne({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
     return this.wishesService.findMany({
       where: {
-        owner: req.user.id,
+        owner: {
+          id: user.id,
+        },
+      },
+    });
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает список подарков пользователя с заданным username',
+    type: [Wish],
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+    type: NoValidUserResponseDto,
+  })
+  @Get(':username/wishes')
+  async getUserWishes(@Param('username') username: string) {
+    const user = await this.usersService.findOne({
+      where: {
+        username,
+      },
+    });
+
+    if (!user) {
+      // не раскрывать существующих / не существующих пользователей в целях безопасности
+      return [];
+    }
+
+    return this.wishesService.findMany({
+      where: {
+        owner: {
+          id: user.id,
+        },
       },
     });
   }

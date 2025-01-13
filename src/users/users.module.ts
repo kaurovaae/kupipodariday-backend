@@ -10,8 +10,7 @@ import { WishesModule } from '../wishes/wishes.module';
   imports: [
     TypeOrmModule.forFeature([User]),
     forwardRef(() => WishesModule),
-    // forwardRef(() => WishesModule),
-    // forwardRef(() => WishesModule),
+    //
   ],
   controllers: [UsersController],
   providers: [UsersService, JwtGuard],

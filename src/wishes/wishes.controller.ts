@@ -22,14 +22,20 @@ import { WishesService } from './wishes.service';
 import { Wish } from './entities/wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import { JwtGuard } from '../guards/jwt.guard';
 import { NoValidWishResponseDto } from './dto/no-valid-wish-response.dto';
+import { JwtGuard } from '../guards/jwt.guard';
+import { ServerException } from '../exceptions/server.exception';
+import { ErrorCode } from '../exceptions/error-codes';
+import { UsersService } from '../users/users.service';
 
 @ApiBearerAuth()
 @ApiTags('wishes')
 @Controller('wishes')
 export class WishesController {
-  constructor(private wishesService: WishesService) {}
+  constructor(
+    private wishesService: WishesService,
+    private usersService: UsersService,
+  ) {}
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
@@ -68,13 +74,19 @@ export class WishesController {
     type: NoValidWishResponseDto,
   })
   @Post()
-  create(
+  async create(
     @Req() req: Request & { user: { id: number } },
     @Body() wish: CreateWishDto,
   ): Promise<Wish> {
+    const user = await this.usersService.findById(req.user.id);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
     return this.wishesService.create({
       ...wish,
-      owner: req.user.id,
+      owner: user,
     });
   }
 }
