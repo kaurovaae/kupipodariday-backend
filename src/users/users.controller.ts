@@ -95,8 +95,7 @@ export class UsersController {
     });
 
     if (!user) {
-      // не раскрывать существующих / не существующих пользователей в целях безопасности
-      return [];
+      throw new ServerException(ErrorCode.UserNotFound);
     }
 
     return this.wishesService.findMany({
@@ -137,6 +136,15 @@ export class UsersController {
   }
 
   @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Обновляет данные пользователя',
+    type: User,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+    type: NoValidUserResponseDto,
+  })
   @Patch('me')
   async updateUserInfo(
     @Req() req: Request & { user: { id: number } },
@@ -146,6 +154,15 @@ export class UsersController {
   }
 
   @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает пользователя с указанным username',
+    type: User,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+    type: NoValidUserResponseDto,
+  })
   @ApiParam({
     name: 'username',
     description: 'Имя пользователя',
