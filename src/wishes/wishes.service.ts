@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateWishDto } from './dto/create-wish.dto';
@@ -17,8 +18,8 @@ export class WishesService {
     return this.wishesRepository.find();
   }
 
-  async findOne(id: number): Promise<Wish> {
-    return this.wishesRepository.findOneBy({ id });
+  async findOne(options: FindOneOptions<Wish>): Promise<Wish> {
+    return this.wishesRepository.findOne(options);
   }
 
   async findMany(options: FindManyOptions<Wish>): Promise<Wish[]> {
