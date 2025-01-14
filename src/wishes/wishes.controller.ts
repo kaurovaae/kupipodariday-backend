@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -27,12 +28,18 @@ import { JwtGuard } from '../guards/jwt.guard';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
 import { UsersService } from '../users/users.service';
+import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
 
 const TOP_WISHES_COUNT = Object.freeze(20);
 const LAST_WISHES_COUNT = Object.freeze(40);
 
 @ApiBearerAuth()
 @ApiTags('wishes')
+@UseGuards(JwtGuard)
+@ApiUnauthorizedResponse({
+  description: 'Unauthorized',
+  type: NoValidUserResponseDto,
+})
 @Controller('wishes')
 export class WishesController {
   constructor(
@@ -57,17 +64,28 @@ export class WishesController {
   }
 
   @Delete(':id')
-  async removeById(@Param('id') id: number) {
+  async removeById(
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     const wish = await this.wishesService.findOne({ where: { id } });
     if (!wish) {
       throw new ServerException(ErrorCode.NotFound);
     }
+
+    if (wish.owner.id !== req.user.id || wish.raised > 0) {
+      // Пользователь может удалить только свой подарок,
+      // если только никто ещё не решил скинуться
+      throw new ServerException(ErrorCode.Conflict);
+    }
+
     await this.wishesService.removeById(id);
   }
 
   @Patch(':id')
   async updateById(
-    @Param('id') id: number,
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateWishDto: UpdateWishDto,
   ) {
     const wish = await this.wishesService.findOne({ where: { id } });
@@ -75,7 +93,7 @@ export class WishesController {
       throw new ServerException(ErrorCode.NotFound);
     }
 
-    if (wish.raised > 0) {
+    if (wish.owner.id !== req.user.id || wish.raised > 0) {
       // Пользователь может отредактировать описание своих подарков и стоимость,
       // если только никто ещё не решил скинуться
       throw new ServerException(ErrorCode.Conflict);
@@ -84,12 +102,79 @@ export class WishesController {
     await this.wishesService.updateById(id, updateWishDto);
   }
 
+  @ApiResponse({
+    description: 'Возвращает подарок по id',
+    type: Wish,
+  })
   @Get(':id')
-  async findOne(@Param('id') id: number) {
-    return this.wishesService.findOne({
+  async findOne(
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const user = await this.usersService.findById(req.user.id);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    const wish = await this.wishesService.findOne({
       where: { id },
-      relations: { owner: true },
+      relations: {
+        owner: true,
+        offers: {
+          user: true,
+        },
+      },
     });
+
+    const {
+      name,
+      image,
+      link,
+      description,
+      price,
+      raised,
+      offers,
+      owner,
+      createdAt,
+    } = wish;
+
+    if (wish.owner.id === user.id) {
+      // Для своих подарков: название, изображение и ссылка на товар,
+      // прогресс сбора средств и список участников
+      return {
+        id,
+        name,
+        image,
+        link,
+        description,
+        price,
+        raised,
+        offers,
+        owner,
+        createdAt,
+      };
+    }
+
+    // Для чужих подарков: отображение описания подарка, а также тех,
+    // кто скидывается и по сколько (если участник не захотел скрыть сумму вклада).
+    return {
+      id,
+      name,
+      image,
+      link,
+      description,
+      price,
+      raised,
+      owner,
+      createdAt,
+      offers: offers.map((offer) => ({
+        createdAt: offer.createdAt,
+        name: offer.user.username,
+        amount: offer.hidden ? '***' : offer.amount,
+        img: offer.user.avatar,
+      })),
+    };
   }
 
   @Get()
@@ -97,7 +182,6 @@ export class WishesController {
     return this.wishesService.findAll();
   }
 
-  @UseGuards(JwtGuard)
   @ApiResponse({
     status: 201,
     description: 'Возвращает созданный подарок',

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -40,7 +41,7 @@ export class WishlistsController {
   ) {}
 
   @Delete(':id')
-  async removeById(@Param('id') id: number) {
+  async removeById(@Param('id', ParseIntPipe) id: number) {
     const wishlist = await this.wishlistsService.findOne(id);
     if (!wishlist) {
       throw new ServerException(ErrorCode.NotFound);
@@ -50,7 +51,7 @@ export class WishlistsController {
 
   @Patch(':id')
   async updateById(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
     const wishlist = await this.wishlistsService.findOne(id);

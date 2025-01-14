@@ -1,15 +1,28 @@
-import { IsBoolean, IsDecimal, IsInt, IsOptional } from 'class-validator';
-import { User } from '../../users/entities/user.entity';
-import { Wish } from '../../wishes/entities/wish.entity';
+import {
+  IsBoolean,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  //
+} from 'class-validator';
+import { Column } from 'typeorm';
+import { OmitType } from '@nestjs/swagger';
+import { Offer } from '../entities/offer.entity';
 
-export class CreateOfferDto {
+export class CreateOfferDto extends OmitType(Offer, [
+  'id',
+  'createdAt',
+  'updatedAt',
+]) {}
+
+export class CreateOfferRequestDto {
   @IsInt()
-  user: User;
+  itemId: number;
 
-  @IsInt()
-  item: Wish;
-
-  @IsDecimal({ decimal_digits: '2' })
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Column('decimal', {
+    scale: 2,
+  })
   amount: number;
 
   @IsBoolean()

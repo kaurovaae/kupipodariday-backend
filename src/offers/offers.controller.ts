@@ -8,17 +8,40 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { Offer } from './entities/offer.entity';
-import { CreateOfferDto } from './dto/create-offer.dto';
+import { CreateOfferRequestDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { Request } from 'express';
+import { ServerException } from '../exceptions/server.exception';
+import { ErrorCode } from '../exceptions/error-codes';
+import { UsersService } from '../users/users.service';
+import { WishesService } from '../wishes/wishes.service';
+import { JwtGuard } from '../guards/jwt.guard';
+import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
 
+@ApiBearerAuth()
 @ApiTags('offers')
+@UseGuards(JwtGuard)
+@ApiUnauthorizedResponse({
+  description: 'Unauthorized',
+  type: NoValidUserResponseDto,
+})
 @Controller('offers')
 export class OffersController {
-  constructor(private offersService: OffersService) {}
+  constructor(
+    private offersService: OffersService,
+    private usersService: UsersService,
+    private wishesService: WishesService,
+  ) {}
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
@@ -41,13 +64,60 @@ export class OffersController {
     await this.offersService.updateById(id, updateOfferDto);
   }
 
+  @Post()
+  async create(
+    @Req() req: Request & { user: { id: number } },
+    @Body() offer: CreateOfferRequestDto,
+  ): Promise<Offer> {
+    const user = await this.usersService.findOne({
+      where: { id: req.user.id },
+    });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    const wish = await this.wishesService.findOne({
+      where: { id: offer.itemId },
+    });
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.NotFound);
+    }
+
+    // TODO: обернуть в транзакции на случай ошибок
+    // TODO: математические операции с деньгами (кейсы копеек)
+    // TODO: модели запросов / ответов
+
+    await this.wishesService.updateById(offer.itemId, {
+      raised: +wish.raised + +offer.amount,
+    });
+
+    return this.offersService.create({
+      item: wish,
+      user,
+      amount: offer.amount,
+      hidden: offer.hidden,
+    });
+
+    // const queryRunner = this.dataSource.createQueryRunner();
+    //
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+    // try {
+    //   // Сохраняем всех пользователей
+    //   await Promise.all(users.map((user)=>queryRunner.manager.save(user));
+    //
+    //   await queryRunner.commitTransaction();
+    // } catch (err) {
+    //   await queryRunner.rollbackTransaction();
+    // } finally {
+    //   await queryRunner.release();
+    // }
+  }
+
   @Get()
   findAll(): Promise<Offer[]> {
     return this.offersService.findAll();
-  }
-
-  @Post()
-  create(@Body() offer: CreateOfferDto): Promise<Offer> {
-    return this.offersService.create(offer);
   }
 }

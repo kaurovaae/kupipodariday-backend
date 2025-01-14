@@ -9,11 +9,11 @@ import {
 } from 'typeorm';
 import {
   IsNumber,
-  IsInt,
   IsUrl,
   IsString,
   Length,
   IsOptional,
+  //
 } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
