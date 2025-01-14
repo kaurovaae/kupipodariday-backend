@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   Patch,
   Post,
@@ -22,6 +21,7 @@ import { Wish } from './entities/wish.entity';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { TopWishResponseDto } from './dto/top-wish-response.dto';
+import { LastWishResponseDto } from './dto/last-wish-response.dto';
 import { NoValidWishResponseDto } from './dto/no-valid-wish-response.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { ServerException } from '../exceptions/server.exception';
@@ -41,7 +41,7 @@ export class WishesController {
   ) {}
 
   @Get('last')
-  findLast(): Promise<Wish[]> {
+  findLast(): Promise<LastWishResponseDto[]> {
     return this.wishesService.findMany({
       take: LAST_WISHES_COUNT,
       order: { createdAt: 'DESC' },
@@ -60,7 +60,7 @@ export class WishesController {
   async removeById(@Param('id') id: number) {
     const wish = await this.wishesService.findOne({ where: { id } });
     if (!wish) {
-      throw new NotFoundException();
+      throw new ServerException(ErrorCode.NotFound);
     }
     await this.wishesService.removeById(id);
   }
@@ -72,8 +72,15 @@ export class WishesController {
   ) {
     const wish = await this.wishesService.findOne({ where: { id } });
     if (!wish) {
-      throw new NotFoundException();
+      throw new ServerException(ErrorCode.NotFound);
     }
+
+    if (wish.raised > 0) {
+      // Пользователь может отредактировать описание своих подарков и стоимость,
+      // если только никто ещё не решил скинуться
+      throw new ServerException(ErrorCode.Conflict);
+    }
+
     await this.wishesService.updateById(id, updateWishDto);
   }
 

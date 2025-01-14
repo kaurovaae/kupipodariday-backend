@@ -5,6 +5,8 @@ export enum ErrorCode {
   UserAlreadyExists = 101,
   UserNotFound = 102,
   Unauthorized = 103,
+  NotFound = 104,
+  Conflict = 105,
 }
 
 export const code2message = new Map<ErrorCode, string>([
@@ -12,6 +14,8 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.UserAlreadyExists, 'User already exists'],
   [ErrorCode.Unauthorized, 'Unauthorized'],
   [ErrorCode.UserNotFound, 'User not found'],
+  [ErrorCode.NotFound, 'Not found'],
+  [ErrorCode.Conflict, 'Conflict'],
 ]);
 
 export const code2status = new Map<ErrorCode, HttpStatus>([
@@ -19,4 +23,6 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.UserAlreadyExists, HttpStatus.BAD_REQUEST],
   [ErrorCode.Unauthorized, HttpStatus.UNAUTHORIZED],
   [ErrorCode.UserNotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.NotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.Conflict, HttpStatus.CONFLICT],
 ]);

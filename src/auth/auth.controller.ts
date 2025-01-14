@@ -5,8 +5,8 @@ import { ErrorCode } from '../exceptions/error-codes';
 import { LocalGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
 import { ServerException } from '../exceptions/server.exception';
-import { CreateUserDto } from '../users/dto/create-user.dto';
 import { SigninUserDto, SigninUserResponseDto } from './dto/signin-user.dto';
+import { SignupUserDto, SignupUserResponseDto } from './dto/signup-user.dto';
 
 @ApiTags('auth')
 @Controller('')
@@ -31,10 +31,12 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body() createUserDto: CreateUserDto) {
+  async signup(
+    @Body() signupUserDto: SignupUserDto,
+  ): Promise<SignupUserResponseDto> {
     const isExists = await this.usersService.findOne({
       where: {
-        username: createUserDto.username,
+        username: signupUserDto.username,
       },
     });
     if (isExists) {
@@ -42,7 +44,7 @@ export class AuthController {
     }
 
     /* При регистрации создаём пользователя и генерируем для него токен */
-    const user = await this.usersService.create(createUserDto);
+    const user = await this.usersService.create(signupUserDto);
 
     return this.authService.auth(user.id);
   }

@@ -53,18 +53,18 @@ export class Wish {
     example:
       'https://avatars.mds.yandex.net/get-mpic/4119784/img_id5125618244090341770.jpeg/optimize',
   })
-  @Column()
   @IsUrl()
+  @Column()
   image: string;
 
   @ApiProperty({
     description: 'Стоимость подарка',
     example: 1037.55,
   })
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Column('decimal', {
     scale: 2,
   })
-  @IsNumber({ maxDecimalPlaces: 2 })
   price: number;
 
   @ApiProperty({
@@ -72,12 +72,12 @@ export class Wish {
       'Сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок',
     example: 1037.55,
   })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @Column('decimal', {
     default: 0,
     scale: 2,
   })
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
   raised: number;
 
   @ManyToOne(() => User, (user) => user.wishes)
@@ -88,8 +88,9 @@ export class Wish {
     example:
       'Альтхофф Кори. Сам себе программист. Как научиться программировать и устроиться в Ebay. Мировой компьютерный бестселлер',
   })
-  @Column()
   @Length(1, 1024)
+  @IsString()
+  @Column()
   description: string;
 
   @OneToMany(() => Offer, (offer) => offer.item)
@@ -98,6 +99,5 @@ export class Wish {
   @Column({
     default: 0,
   })
-  @IsInt()
   copied: number; // содержит cчётчик тех, кто скопировал подарок себе
 }

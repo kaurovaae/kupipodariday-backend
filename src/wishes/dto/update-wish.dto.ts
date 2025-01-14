@@ -1,32 +1,4 @@
-import {
-  IsDecimal,
-  IsString,
-  IsUrl,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { CreateWishDto } from './create-wish.dto';
 
-export class UpdateWishDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(250)
-  name: string;
-
-  @IsString()
-  link: string;
-
-  @IsString()
-  @IsUrl()
-  image: string;
-
-  @IsDecimal({ decimal_digits: '2' })
-  price: number;
-
-  @IsDecimal({ decimal_digits: '2' })
-  raised: number;
-
-  @IsString()
-  @MinLength(1)
-  @MaxLength(1024)
-  description: string;
-}
+export class UpdateWishDto extends PartialType(CreateWishDto) {}

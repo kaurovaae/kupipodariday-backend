@@ -1,26 +1,8 @@
-import {
-  IsArray,
-  IsOptional,
-  IsString,
-  MinLength,
-  MaxLength,
-} from 'class-validator';
-import { Wish } from '../../wishes/entities/wish.entity';
+import { OmitType } from '@nestjs/swagger';
+import { Wishlist } from '../entities/wishlist.entity';
 
-export class CreateWishlistDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(250)
-  name: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(1500)
-  description: string;
-
-  @IsString()
-  image: string;
-
-  @IsArray()
-  items: Wish[];
-}
+export class CreateWishlistDto extends OmitType(Wishlist, [
+  'id',
+  'createdAt',
+  'updatedAt',
+]) {}

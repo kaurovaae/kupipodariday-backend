@@ -7,33 +7,56 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IsOptional, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  Length,
+  MaxLength,
+  IsUrl,
+} from 'class-validator';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { User } from '../../users/entities/user.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Wishlist {
+  @ApiProperty({ description: 'Уникальный id вишлиста' })
   @PrimaryGeneratedColumn()
-  id: number; // уникальный числовой идентификатор
+  id: number;
 
+  @ApiProperty({ description: 'Дата создания вишлиста' })
   @CreateDateColumn()
-  createdAt: Date; // дата создания
+  createdAt: Date;
 
+  @ApiProperty({ description: 'Дата обновления вишлиста' })
   @UpdateDateColumn()
-  updatedAt: Date; // дата изменения
+  updatedAt: Date;
 
+  @ApiProperty({ description: 'Название подарка', example: 'book' })
+  @IsString()
+  @Length(1, 250)
   @Column()
-  @Min(1)
-  @Max(250)
-  name: string; // название списка
+  name: string;
 
-  @Column()
+  @ApiProperty({
+    description: 'Описание подборки',
+    example: 'Мой вишлист',
+  })
+  @MaxLength(1500)
+  @IsString()
   @IsOptional()
-  @Max(1500)
-  description: string; // описание подборки
+  @Column({
+    default: '',
+  })
+  description: string;
 
+  @ApiProperty({
+    description: 'Ссылка на изображение обложки для подборки',
+    example: 'https://i.pravatar.cc/300',
+  })
+  @IsUrl()
   @Column()
-  image: string; // обложка для подборки
+  image: string;
 
   @ManyToOne(() => User, (user) => user.wishlists)
   owner: User; // ссылка на пользователя, который добавил список пожеланий

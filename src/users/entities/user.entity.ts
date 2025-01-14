@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, IsUrl, IsOptional, Length } from 'class-validator';
+import {IsEmail, IsString, IsUrl, IsOptional, Length, MaxLength} from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
@@ -37,7 +37,8 @@ export class User {
   @ApiProperty({ description: 'Описание пользователя', example: 'student' })
   @IsString()
   @IsOptional()
-  @Length(2, 200)
+  @MaxLength(200)
+  // @Length(2, 200)
   @Column({
     default: 'Пока ничего не рассказал о себе',
   })
