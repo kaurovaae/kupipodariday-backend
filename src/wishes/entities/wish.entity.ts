@@ -61,7 +61,7 @@ export class Wish {
 
   @ApiProperty({
     description: 'Стоимость подарка',
-    example: 1037.55,
+    example: 5000,
   })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Column('decimal', {
@@ -72,7 +72,7 @@ export class Wish {
   @ApiProperty({
     description:
       'Сумма предварительного сбора или сумма, которую пользователи сейчас готовы скинуть на подарок',
-    example: 1037.55,
+    example: 200.55,
   })
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
