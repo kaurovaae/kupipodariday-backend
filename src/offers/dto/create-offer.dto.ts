@@ -6,14 +6,20 @@ import {
   //
 } from 'class-validator';
 import { Column } from 'typeorm';
-import { OmitType } from '@nestjs/swagger';
-import { Offer } from '../entities/offer.entity';
 
-export class CreateOfferDto extends OmitType(Offer, [
-  'id',
-  'createdAt',
-  'updatedAt',
-]) {}
+export class CreateOfferDto {
+  item: {
+    id: number;
+  };
+
+  user: {
+    id: number;
+  };
+
+  amount: number;
+
+  hidden: boolean;
+}
 
 export class CreateOfferRequestDto {
   @IsInt()

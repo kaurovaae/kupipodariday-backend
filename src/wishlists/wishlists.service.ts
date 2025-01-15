@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
+import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
@@ -12,12 +14,12 @@ export class WishlistsService {
     private wishlistsRepository: Repository<Wishlist>,
   ) {}
 
-  async findAll(): Promise<Wishlist[]> {
-    return this.wishlistsRepository.find();
+  async findMany(options: FindManyOptions<Wishlist>): Promise<Wishlist[]> {
+    return this.wishlistsRepository.find(options);
   }
 
-  async findOne(id: number): Promise<Wishlist> {
-    return this.wishlistsRepository.findOneBy({ id });
+  async findOne(options: FindOneOptions<Wishlist>): Promise<Wishlist> {
+    return this.wishlistsRepository.findOne(options);
   }
 
   async create(createWishlistDto: CreateWishlistDto): Promise<Wishlist> {

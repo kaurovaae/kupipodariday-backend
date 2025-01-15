@@ -18,9 +18,11 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
+  @ManyToOne(() => Wishlist, (wishlist) => wishlist.items)
   @ApiProperty({ description: 'Уникальный id подарка' })
   @PrimaryGeneratedColumn()
   id: number;

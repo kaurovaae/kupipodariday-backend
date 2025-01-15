@@ -6,7 +6,10 @@ export enum ErrorCode {
   UserNotFound = 102,
   Unauthorized = 103,
   NotFound = 104,
-  Conflict = 105,
+  WishNotFound = 105,
+  OfferNotFound = 106,
+  WishlistNotFound = 107,
+  Conflict = 108,
 }
 
 export const code2message = new Map<ErrorCode, string>([
@@ -15,6 +18,9 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.Unauthorized, 'Unauthorized'],
   [ErrorCode.UserNotFound, 'User not found'],
   [ErrorCode.NotFound, 'Not found'],
+  [ErrorCode.WishNotFound, 'Wish not found'],
+  [ErrorCode.OfferNotFound, 'Offer not found'],
+  [ErrorCode.WishlistNotFound, 'Wishlist not found'],
   [ErrorCode.Conflict, 'Conflict'],
 ]);
 
@@ -24,5 +30,8 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.Unauthorized, HttpStatus.UNAUTHORIZED],
   [ErrorCode.UserNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.NotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.WishNotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.OfferNotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.WishlistNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.Conflict, HttpStatus.CONFLICT],
 ]);

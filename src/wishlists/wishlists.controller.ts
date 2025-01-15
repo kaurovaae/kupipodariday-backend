@@ -16,7 +16,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { WishlistsService } from './wishlists.service';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
+import { CreateWishlistRequestDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { Wishlist } from './entities/wishlist.entity';
 import { JwtGuard } from '../guards/jwt.guard';
@@ -24,7 +24,6 @@ import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto'
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
 import { Request } from 'express';
-import { UsersService } from '../users/users.service';
 
 @ApiBearerAuth()
 @ApiTags('wishlistlists')
@@ -35,16 +34,13 @@ import { UsersService } from '../users/users.service';
 })
 @Controller('wishlistlists')
 export class WishlistsController {
-  constructor(
-    private wishlistsService: WishlistsService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private wishlistsService: WishlistsService) {}
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const wishlist = await this.wishlistsService.findOne(id);
+    const wishlist = await this.wishlistsService.findOne({ where: { id } });
     if (!wishlist) {
-      throw new ServerException(ErrorCode.NotFound);
+      throw new ServerException(ErrorCode.WishlistNotFound);
     }
     await this.wishlistsService.removeById(id);
   }
@@ -54,32 +50,33 @@ export class WishlistsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishlist = await this.wishlistsService.findOne(id);
+    const wishlist = await this.wishlistsService.findOne({ where: { id } });
     if (!wishlist) {
-      throw new ServerException(ErrorCode.NotFound);
+      throw new ServerException(ErrorCode.WishlistNotFound);
     }
     await this.wishlistsService.updateById(id, updateWishlistDto);
-  }
-
-  @Get()
-  findAll(): Promise<Wishlist[]> {
-    return this.wishlistsService.findAll();
   }
 
   @Post()
   async create(
     @Req() req: Request & { user: { id: number } },
-    @Body() wishlist: CreateWishlistDto,
+    @Body() wishlist: CreateWishlistRequestDto,
   ): Promise<Wishlist> {
-    const user = await this.usersService.findById(req.user.id);
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
     return this.wishlistsService.create({
       ...wishlist,
-      owner: user,
+      owner: {
+        id: req.user.id,
+      },
+    });
+  }
+
+  @Get()
+  findAll(): Promise<Wishlist[]> {
+    return this.wishlistsService.findMany({
+      // relations: {
+      //   users: true,
+      //   wishes: true,
+      // },
     });
   }
 }

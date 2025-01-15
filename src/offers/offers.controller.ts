@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Post,
   Param,
   ParseIntPipe,
@@ -23,7 +22,6 @@ import {
 import { Request } from 'express';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
-import { UsersService } from '../users/users.service';
 import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
@@ -39,7 +37,6 @@ import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto'
 export class OffersController {
   constructor(
     private offersService: OffersService,
-    private usersService: UsersService,
     private wishesService: WishesService,
   ) {}
 
@@ -47,7 +44,7 @@ export class OffersController {
   async removeById(@Param('id', ParseIntPipe) id: number) {
     const offer = await this.offersService.findOne(id);
     if (!offer) {
-      throw new NotFoundException();
+      throw new ServerException(ErrorCode.OfferNotFound);
     }
     await this.offersService.removeById(id);
   }
@@ -59,7 +56,7 @@ export class OffersController {
   ) {
     const offer = await this.offersService.findOne(id);
     if (!offer) {
-      throw new NotFoundException();
+      throw new ServerException(ErrorCode.OfferNotFound);
     }
     await this.offersService.updateById(id, updateOfferDto);
   }
@@ -69,20 +66,12 @@ export class OffersController {
     @Req() req: Request & { user: { id: number } },
     @Body() offer: CreateOfferRequestDto,
   ): Promise<Offer> {
-    const user = await this.usersService.findOne({
-      where: { id: req.user.id },
-    });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
     const wish = await this.wishesService.findOne({
       where: { id: offer.itemId },
     });
 
     if (!wish) {
-      throw new ServerException(ErrorCode.NotFound);
+      throw new ServerException(ErrorCode.WishNotFound);
     }
 
     // TODO: обернуть в транзакции на случай ошибок
@@ -94,8 +83,12 @@ export class OffersController {
     });
 
     return this.offersService.create({
-      item: wish,
-      user,
+      item: {
+        id: wish.id,
+      },
+      user: {
+        id: req.user.id,
+      },
       amount: offer.amount,
       hidden: offer.hidden,
     });

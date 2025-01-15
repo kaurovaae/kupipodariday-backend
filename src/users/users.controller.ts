@@ -51,20 +51,10 @@ export class UsersController {
   })
   @Get('me/wishes')
   async getMyWishes(@Req() req: Request & { user: { id: number } }) {
-    const user = await this.usersService.findOne({
-      where: {
-        id: req.user.id,
-      },
-    });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
     return this.wishesService.findMany({
       where: {
         owner: {
-          id: user.id,
+          id: req.user.id,
         },
       },
     });
