@@ -57,6 +57,23 @@ export class WishlistsController {
     await this.wishlistsService.updateById(id, updateWishlistDto);
   }
 
+  @Get(':id')
+  async findById(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateWishlistDto: UpdateWishlistDto,
+  ) {
+    const wishlist = await this.wishlistsService.findOne({
+      where: { id },
+      // relations: {
+      //   wishes: true,
+      // },
+    });
+    if (!wishlist) {
+      throw new ServerException(ErrorCode.WishlistNotFound);
+    }
+    return wishlist;
+  }
+
   @Post()
   async create(
     @Req() req: Request & { user: { id: number } },
