@@ -60,7 +60,6 @@ export class WishlistsController {
   @Get(':id')
   async findById(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
     const wishlist = await this.wishlistsService.findOne({
       where: { id },
