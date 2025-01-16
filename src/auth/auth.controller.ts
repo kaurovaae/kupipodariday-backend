@@ -36,15 +36,20 @@ export class AuthController {
   ): Promise<SignupUserResponseDto> {
     const isExists = await this.usersService.findOne({
       where: {
-        username: signupUserDto.username,
+        username: signupUserDto.username.toLowerCase(),
       },
     });
+
     if (isExists) {
       throw new ServerException(ErrorCode.UserAlreadyExists);
     }
 
     /* При регистрации создаём пользователя и генерируем для него токен */
-    const user = await this.usersService.create(signupUserDto);
+    const user = await this.usersService.create({
+      ...signupUserDto,
+      username: signupUserDto.username.toLowerCase(),
+      email: signupUserDto.email.toLowerCase(),
+    });
 
     return this.authService.auth(user.id);
   }

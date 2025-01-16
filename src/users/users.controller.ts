@@ -68,7 +68,11 @@ export class UsersController {
   })
   @Get(':username/wishes')
   async getUserWishes(@Param('username') username: string) {
-    const user = await this.usersService.findOne({ where: { username } });
+    const user = await this.usersService.findOne({
+      where: {
+        username: username.toLowerCase(),
+      }
+    });
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
@@ -122,7 +126,7 @@ export class UsersController {
   findOne(@Param('username') username: string): Promise<FindUserDto> {
     return this.usersService.findOne({
       where: {
-        username,
+        username: username.toLowerCase(),
       },
       select: {
         id: true,
@@ -149,7 +153,14 @@ export class UsersController {
   @Post('find')
   async findMany(@Query('query') query: string): Promise<FindUserDto> {
     return this.usersService.findOne({
-      where: [{ email: query }, { username: query }],
+      where: [
+        {
+          email: query.toLowerCase(),
+        },
+        {
+          username: query.toLowerCase(),
+        },
+      ],
     });
   }
 

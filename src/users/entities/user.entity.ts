@@ -13,7 +13,6 @@ import {
   IsUrl,
   IsOptional,
   Length,
-  MaxLength,
 } from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
@@ -44,8 +43,7 @@ export class User {
   @ApiProperty({ description: 'Описание пользователя', example: 'student' })
   @IsString()
   @IsOptional()
-  @MaxLength(200)
-  // @Length(2, 200)
+  @Length(2, 200)
   @Column({
     default: 'Пока ничего не рассказал о себе',
   })
