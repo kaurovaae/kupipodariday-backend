@@ -7,7 +7,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import {IsEmail, IsString, IsUrl, IsOptional, Length, MaxLength} from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsUrl,
+  IsOptional,
+  Length,
+  MaxLength,
+} from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
