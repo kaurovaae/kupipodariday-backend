@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUserDto } from './dto/get-user.dto';
 import { NoValidUserResponseDto } from './dto/no-valid-user-response.dto';
 import { User } from './entities/user.entity';
 import { Wish } from '../wishes/entities/wish.entity';
@@ -67,11 +68,7 @@ export class UsersController {
   })
   @Get(':username/wishes')
   async getUserWishes(@Param('username') username: string) {
-    const user = await this.usersService.findOne({
-      where: {
-        username,
-      },
-    });
+    const user = await this.usersService.findOne({ where: { username } });
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
@@ -92,21 +89,10 @@ export class UsersController {
     type: User,
   })
   @Get('me')
-  async getUserInfo(@Req() req: Request & { user: { id: number } }) {
-    return this.usersService.findOne({
-      where: {
-        id: req.user.id,
-      },
-      select: {
-        email: true,
-        username: true,
-        id: true,
-        avatar: true,
-        about: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  async getUserInfo(
+    @Req() req: Request & { user: { id: number } },
+  ): Promise<GetUserDto> {
+    return this.usersService.findOne({ where: { id: req.user.id } });
   }
 
   @ApiResponse({
