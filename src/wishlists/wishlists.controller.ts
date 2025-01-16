@@ -58,9 +58,7 @@ export class WishlistsController {
   }
 
   @Get(':id')
-  async findById(
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  async findById(@Param('id', ParseIntPipe) id: number) {
     const wishlist = await this.wishlistsService.findOne({
       where: { id },
       // relations: {
