@@ -23,7 +23,6 @@ import { CreateWishRequestDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { TopWishResponseDto } from './dto/top-wish-response.dto';
 import { LastWishResponseDto } from './dto/last-wish-response.dto';
-import { NoValidWishResponseDto } from './dto/no-valid-wish-response.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
@@ -56,6 +55,40 @@ export class WishesController {
     return this.wishesService.findMany({
       take: TOP_WISHES_COUNT,
       order: { copied: 'DESC' },
+    });
+  }
+
+  @ApiResponse({
+    description: 'Копирует подарок текущему пользователю по заданному id',
+    type: [Wish],
+  })
+  @Post(':id/copy')
+  async copyWish(
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const wish = await this.wishesService.findOne({ where: { id } });
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
+
+    // TODO: обернуть в транзакции на случай ошибок
+
+    await this.wishesService.updateById(id, {
+      copied: wish.copied + 1,
+    });
+
+    return this.wishesService.create({
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: wish.price,
+      description: wish.description,
+      raised: 0,
+      owner: {
+        id: req.user.id,
+      },
     });
   }
 
@@ -173,6 +206,10 @@ export class WishesController {
     };
   }
 
+  @ApiResponse({
+    description: 'Возвращает список всех подарков',
+    type: [Wish],
+  })
   @Get()
   findAll(): Promise<Wish[]> {
     return this.wishesService.findAll();
@@ -182,10 +219,6 @@ export class WishesController {
     status: 201,
     description: 'Возвращает созданный подарок',
     type: Wish,
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-    type: NoValidWishResponseDto,
   })
   @Post()
   async create(

@@ -18,11 +18,10 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
-  @ManyToOne(() => Wishlist, (wishlist) => wishlist.items)
+  // нельзя юзать many to one, тк ломается поиск по id
   @ApiProperty({ description: 'Уникальный id подарка' })
   @PrimaryGeneratedColumn()
   id: number;

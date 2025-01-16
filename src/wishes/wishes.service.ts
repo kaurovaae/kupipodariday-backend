@@ -18,7 +18,7 @@ export class WishesService {
     return this.wishesRepository.find();
   }
 
-  async findOne(options: FindOneOptions<Wish>): Promise<Wish> {
+  async findOne(options: FindOneOptions): Promise<Wish> {
     return this.wishesRepository.findOne(options);
   }
 

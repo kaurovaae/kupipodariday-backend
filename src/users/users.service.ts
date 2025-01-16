@@ -31,11 +31,11 @@ export class UsersService {
     return this.usersRepository.findOneBy({ id });
   }
 
-  async findOne(options: FindOneOptions<User>): Promise<User> {
+  async findOne(options: FindOneOptions): Promise<User> {
     return this.usersRepository.findOne(options);
   }
 
-  async findMany(options: FindManyOptions<User>): Promise<FindUserDto[]> {
+  async findMany(options: FindManyOptions): Promise<FindUserDto[]> {
     return this.usersRepository.find(options);
   }
 

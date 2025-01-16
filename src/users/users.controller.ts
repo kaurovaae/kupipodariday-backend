@@ -151,16 +151,9 @@ export class UsersController {
     example: 'Иван',
   })
   @Post('find')
-  async findMany(@Query('query') query: string): Promise<FindUserDto> {
-    return this.usersService.findOne({
-      where: [
-        {
-          email: query.toLowerCase(),
-        },
-        {
-          username: query.toLowerCase(),
-        },
-      ],
+  async findMany(@Query() query: { query: string }) {
+    return this.usersService.findMany({
+      where: [{ email: query.query }, { username: query.query }],
     });
   }
 
