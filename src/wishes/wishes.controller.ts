@@ -42,6 +42,11 @@ const LAST_WISHES_COUNT = Object.freeze(40);
 export class WishesController {
   constructor(private wishesService: WishesService) {}
 
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает 40 последних добавленных подарков',
+    type: [Wish],
+  })
   @Get('last')
   findLast(): Promise<LastWishResponseDto[]> {
     return this.wishesService.findMany({
@@ -50,6 +55,11 @@ export class WishesController {
     });
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает 20 популярных подарков',
+    type: [Wish],
+  })
   @Get('top')
   findTop(): Promise<TopWishResponseDto[]> {
     return this.wishesService.findMany({
@@ -59,6 +69,7 @@ export class WishesController {
   }
 
   @ApiResponse({
+    status: 200,
     description: 'Копирует подарок текущему пользователю по заданному id',
     type: [Wish],
   })
@@ -92,6 +103,10 @@ export class WishesController {
     });
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Удаляет подарок с заданным id',
+  })
   @Delete(':id')
   async removeById(
     @Req() req: Request & { user: { id: number } },
@@ -112,6 +127,10 @@ export class WishesController {
     await this.wishesService.removeById(id);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Обновляет данные подарка с заданным id',
+  })
   @Patch(':id')
   async updateById(
     @Req() req: Request & { user: { id: number } },
@@ -134,7 +153,7 @@ export class WishesController {
   }
 
   @ApiResponse({
-    description: 'Возвращает подарок по id',
+    description: 'Возвращает подарок по указанному id',
     type: Wish,
   })
   @Get(':id')

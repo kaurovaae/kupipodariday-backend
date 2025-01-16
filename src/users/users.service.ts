@@ -16,21 +16,6 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
-  }
-
-  async findByOffset(limit: number, offset: number) {
-    return this.usersRepository.findAndCount({
-      take: limit,
-      skip: offset, // (page - 1) * limit,
-    });
-  }
-
-  async findById(id: number): Promise<User> {
-    return this.usersRepository.findOneBy({ id });
-  }
-
   async findOne(options: FindOneOptions): Promise<User> {
     return this.usersRepository.findOne(options);
   }
@@ -47,10 +32,6 @@ export class UsersService {
       ...rest,
       password: hash,
     });
-  }
-
-  async removeById(id: number) {
-    return this.usersRepository.delete({ id });
   }
 
   async update(
@@ -71,5 +52,9 @@ export class UsersService {
 
   async updateById(id: number, updateUserDto: UpdateUserDto) {
     return this.usersRepository.update({ id }, updateUserDto);
+  }
+
+  async removeById(id: number) {
+    return this.usersRepository.delete({ id });
   }
 }

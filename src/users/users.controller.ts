@@ -9,6 +9,8 @@ import {
   Query,
   Req,
   UseGuards,
+  ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -67,7 +69,7 @@ export class UsersController {
     type: [Wish],
   })
   @Get(':username/wishes')
-  async getUserWishes(@Param('username') username: string) {
+  async getWishesByUsername(@Param('username') username: string) {
     const user = await this.usersService.findOne({
       where: {
         username: username.toLowerCase(),
@@ -89,11 +91,11 @@ export class UsersController {
 
   @ApiResponse({
     status: 200,
-    description: 'Возвращает пользователя по токену',
+    description: 'Возвращает данные пользователя',
     type: User,
   })
   @Get('me')
-  async getUserInfo(
+  async getMyInfo(
     @Req() req: Request & { user: { id: number } },
   ): Promise<GetUserDto> {
     return this.usersService.findOne({ where: { id: req.user.id } });
@@ -114,7 +116,7 @@ export class UsersController {
 
   @ApiResponse({
     status: 200,
-    description: 'Возвращает пользователя с указанным username',
+    description: 'Возвращает данные пользователя с указанным username',
     type: User,
   })
   @ApiParam({
@@ -123,7 +125,7 @@ export class UsersController {
     example: 'Иван',
   })
   @Get(':username')
-  findOne(@Param('username') username: string): Promise<FindUserDto> {
+  findByUsername(@Param('username') username: string): Promise<FindUserDto> {
     return this.usersService.findOne({
       where: {
         username: username.toLowerCase(),
@@ -133,9 +135,6 @@ export class UsersController {
         username: true,
         avatar: true,
         about: true,
-      },
-      relations: {
-        wishes: true,
       },
     });
   }
@@ -151,50 +150,36 @@ export class UsersController {
     example: 'Иван',
   })
   @Post('find')
-  async findMany(@Query() query: { query: string }) {
+  async findMany(@Query('query') query: string) {
+    // TODO: why query is empty?
     return this.usersService.findMany({
-      where: [{ email: query.query }, { username: query.query }],
+      where: [{ email: query }, { username: query }],
     });
   }
 
-  // @Post('findByOffset')
-  // async findByOffset(
-  //   @Query() limit: number,
-  //   @Query() offset: number,
-  // ): Promise<User[]> {
-  //   const normalizedLimit = Math.min(limit, PAGE_SIZE);
-  //
-  //   const [users] = await this.usersService.findByOffset(
-  //     normalizedLimit,
-  //     offset,
-  //   );
-  //
-  //   return users;
-  // }
+  @Delete(':id')
+  async removeById(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findOne({ where: { id } });
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+    await this.usersService.removeById(id);
+  }
 
-  // @Delete(':id')
-  // async removeById(@Param('id', ParseIntPipe) id: number) {
-  //   const user = await this.usersService.findById(id);
-  //   if (!user) {
-  //     throw new NotFoundException();
-  //   }
-  //   await this.usersService.removeById(id);
-  // }
-  //
-  // @Patch(':id')
-  // async updateById(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updateUserDto: UpdateUserDto,
-  // ) {
-  //   const user = await this.usersService.findById(id);
-  //   if (!user) {
-  //     throw new NotFoundException();
-  //   }
-  //   await this.usersService.updateById(id, updateUserDto);
-  // }
-  //
-  // @Get()
-  // findAll(): Promise<User[]> {
-  //   return this.usersService.findAll();
-  // }
+  @Patch(':id')
+  async updateById(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const user = await this.usersService.findOne({ where: { id } });
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+    await this.usersService.updateById(id, updateUserDto);
+  }
+
+  @Get()
+  findAll(): Promise<FindUserDto[]> {
+    return this.usersService.findMany({});
+  }
 }

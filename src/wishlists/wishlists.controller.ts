@@ -61,6 +61,12 @@ export class WishlistsController {
   async findById(@Param('id', ParseIntPipe) id: number) {
     const wishlist = await this.wishlistsService.findOne({
       where: { id },
+      select: {
+        items: {
+          id: true,
+        },
+      },
+      // TODO: wishes ids
       // relations: {
       //   wishes: true,
       // },
@@ -86,11 +92,6 @@ export class WishlistsController {
 
   @Get()
   findAll(): Promise<Wishlist[]> {
-    return this.wishlistsService.findMany({
-      // relations: {
-      //   users: true,
-      //   wishes: true,
-      // },
-    });
+    return this.wishlistsService.findMany({});
   }
 }
