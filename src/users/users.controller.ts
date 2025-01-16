@@ -71,7 +71,7 @@ export class UsersController {
     const user = await this.usersService.findOne({
       where: {
         username: username.toLowerCase(),
-      }
+      },
     });
 
     if (!user) {
