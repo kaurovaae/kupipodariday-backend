@@ -25,6 +25,7 @@ import { ErrorCode } from '../exceptions/error-codes';
 import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
+import { UsersService } from '../users/users.service';
 
 @ApiBearerAuth()
 @ApiTags('offers')
@@ -38,14 +39,17 @@ export class OffersController {
   constructor(
     private offersService: OffersService,
     private wishesService: WishesService,
+    private usersService: UsersService,
   ) {}
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const offer = await this.offersService.findOne(id);
+    const offer = await this.offersService.findOneById(id);
+
     if (!offer) {
       throw new ServerException(ErrorCode.OfferNotFound);
     }
+
     await this.offersService.removeById(id);
   }
 
@@ -54,10 +58,12 @@ export class OffersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOfferDto: UpdateOfferDto,
   ) {
-    const offer = await this.offersService.findOne(id);
+    const offer = await this.offersService.findOneById(id);
+
     if (!offer) {
       throw new ServerException(ErrorCode.OfferNotFound);
     }
+
     await this.offersService.updateById(id, updateOfferDto);
   }
 
@@ -66,6 +72,12 @@ export class OffersController {
     @Req() req: Request & { user: { id: number } },
     @Body() offer: CreateOfferRequestDto,
   ): Promise<Offer> {
+    const user = await this.usersService.findOneById(req.user.id);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
     const wish = await this.wishesService.findOne({
       where: { id: offer.itemId },
     });
@@ -89,12 +101,8 @@ export class OffersController {
     await this.wishesService.updateById(itemId, { raised });
 
     return this.offersService.create({
-      item: {
-        id: wish.id,
-      },
-      user: {
-        id: req.user.id,
-      },
+      item: wish,
+      user: user,
       amount: offer.amount,
       hidden: offer.hidden,
     });

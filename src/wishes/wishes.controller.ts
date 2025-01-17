@@ -27,6 +27,7 @@ import { JwtGuard } from '../guards/jwt.guard';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
+import { UsersService } from '../users/users.service';
 
 const TOP_WISHES_COUNT = Object.freeze(20);
 const LAST_WISHES_COUNT = Object.freeze(40);
@@ -40,7 +41,10 @@ const LAST_WISHES_COUNT = Object.freeze(40);
 })
 @Controller('wishes')
 export class WishesController {
-  constructor(private wishesService: WishesService) {}
+  constructor(
+    private wishesService: WishesService,
+    private usersService: UsersService,
+  ) {}
 
   @ApiResponse({
     status: 200,
@@ -78,7 +82,13 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOne({ where: { id } });
+    const user = await this.usersService.findOneById(req.user.id);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    const wish = await this.wishesService.findOneById(id);
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
@@ -97,9 +107,7 @@ export class WishesController {
       price: wish.price,
       description: wish.description,
       raised: 0,
-      owner: {
-        id: req.user.id,
-      },
+      owner: user,
       wishlists: [],
     });
   }
@@ -113,7 +121,7 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOne({ where: { id } });
+    const wish = await this.wishesService.findOneById(id);
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
@@ -138,7 +146,7 @@ export class WishesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    const wish = await this.wishesService.findOne({ where: { id } });
+    const wish = await this.wishesService.findOneById(id);
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
@@ -245,11 +253,15 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Body() wish: CreateWishRequestDto,
   ): Promise<Wish> {
+    const user = await this.usersService.findOneById(req.user.id);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
     return this.wishesService.create({
       ...wish,
-      owner: {
-        id: req.user.id,
-      },
+      owner: user,
     });
   }
 }

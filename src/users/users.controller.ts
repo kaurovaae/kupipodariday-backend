@@ -53,13 +53,7 @@ export class UsersController {
   })
   @Get('me/wishes')
   async getOwnWishes(@Req() req: Request & { user: { id: number } }) {
-    return this.wishesService.findMany({
-      where: {
-        owner: {
-          id: req.user.id,
-        },
-      },
-    });
+    return this.wishesService.findManyByOwnerId(req.user.id);
   }
 
   @ApiResponse({
@@ -68,24 +62,16 @@ export class UsersController {
     type: [Wish],
   })
   @Get(':username/wishes')
-  async getWishesByUsername(@Param('username') username: string) {
-    const user = await this.usersService.findOne({
-      where: {
-        username: username.toLowerCase(),
-      },
-    });
+  async getUserWishes(@Param('username') username: string) {
+    const user = await this.usersService.findOneByUsername(
+      username.toLowerCase(),
+    );
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
     }
 
-    return this.wishesService.findMany({
-      where: {
-        owner: {
-          id: user.id,
-        },
-      },
-    });
+    return this.wishesService.findManyByOwnerId(user.id);
   }
 
   @ApiResponse({
@@ -94,10 +80,10 @@ export class UsersController {
     type: User,
   })
   @Get('me')
-  async getMyInfo(
+  async getOwnInfo(
     @Req() req: Request & { user: { id: number } },
   ): Promise<GetUserDto> {
-    return this.usersService.findOne({ where: { id: req.user.id } });
+    return this.usersService.findOneById(req.user.id);
   }
 
   @ApiResponse({
@@ -106,7 +92,7 @@ export class UsersController {
     type: User,
   })
   @Patch('me')
-  async updateUserInfo(
+  async updateOwnInfo(
     @Req() req: Request & { user: { id: number } },
     @Body() updateUserDto: UpdateUserDto,
   ) {
@@ -157,10 +143,12 @@ export class UsersController {
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.usersService.findOne({ where: { id } });
+    const user = await this.usersService.findOneById(id);
+
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
     }
+
     await this.usersService.removeById(id);
   }
 
@@ -169,10 +157,12 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const user = await this.usersService.findOne({ where: { id } });
+    const user = await this.usersService.findOneById(id);
+
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
     }
+
     await this.usersService.updateById(id, updateUserDto);
   }
 

@@ -20,6 +20,14 @@ export class UsersService {
     return this.usersRepository.findOne(options);
   }
 
+  async findOneById(id: number): Promise<User> {
+    return this.usersRepository.findOneBy({ id });
+  }
+
+  async findOneByUsername(username: string): Promise<User> {
+    return this.usersRepository.findOneBy({ username });
+  }
+
   async findMany(options: FindManyOptions): Promise<FindUserDto[]> {
     return this.usersRepository.find(options);
   }

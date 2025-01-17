@@ -1,17 +1,12 @@
 import { OmitType } from '@nestjs/swagger';
 import { Wish } from '../entities/wish.entity';
 
-export class CreateWishRequestDto extends OmitType(Wish, [
+export class CreateWishDto extends OmitType(Wish, [
   'id',
   'createdAt',
   'updatedAt',
   'offers',
   'copied',
-  'owner',
 ]) {}
 
-export class CreateWishDto extends CreateWishRequestDto {
-  owner: {
-    id: number;
-  };
-}
+export class CreateWishRequestDto extends OmitType(CreateWishDto, ['owner']) {}

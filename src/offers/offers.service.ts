@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
@@ -16,7 +17,11 @@ export class OffersService {
     return this.offersRepository.find();
   }
 
-  async findOne(id: number): Promise<Offer> {
+  async findOne(options: FindOneOptions): Promise<Offer> {
+    return this.offersRepository.findOne(options);
+  }
+
+  async findOneById(id: number): Promise<Offer> {
     return this.offersRepository.findOneBy({ id });
   }
 

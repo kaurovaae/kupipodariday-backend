@@ -22,6 +22,10 @@ export class WishlistsService {
     return this.wishlistsRepository.findOne(options);
   }
 
+  async findOneById(id: number): Promise<Wishlist> {
+    return this.wishlistsRepository.findOneBy({ id });
+  }
+
   async create(createWishlistDto: CreateWishlistDto): Promise<Wishlist> {
     return this.wishlistsRepository.save(createWishlistDto);
   }

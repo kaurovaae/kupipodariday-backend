@@ -22,8 +22,22 @@ export class WishesService {
     return this.wishesRepository.findOne(options);
   }
 
+  async findOneById(id: number): Promise<Wish> {
+    return this.wishesRepository.findOneBy({ id });
+  }
+
   async findMany(options: FindManyOptions<Wish>): Promise<Wish[]> {
     return this.wishesRepository.find(options);
+  }
+
+  async findManyByOwnerId(id: number): Promise<Wish[]> {
+    return this.wishesRepository.find({
+      where: {
+        owner: {
+          id,
+        },
+      },
+    });
   }
 
   async create(createWishDto: CreateWishDto): Promise<Wish> {

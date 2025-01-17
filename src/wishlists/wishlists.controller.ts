@@ -26,6 +26,7 @@ import { ErrorCode } from '../exceptions/error-codes';
 import { Request } from 'express';
 import { In } from 'typeorm';
 import { WishesService } from '../wishes/wishes.service';
+import { UsersService } from '../users/users.service';
 
 @ApiBearerAuth()
 @ApiTags('wishlistlists')
@@ -39,14 +40,17 @@ export class WishlistsController {
   constructor(
     private wishlistsService: WishlistsService,
     private wishesService: WishesService,
+    private usersService: UsersService,
   ) {}
 
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const wishlist = await this.wishlistsService.findOne({ where: { id } });
+    const wishlist = await this.wishlistsService.findOneById(id);
+
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
     }
+
     await this.wishlistsService.removeById(id);
   }
 
@@ -55,10 +59,12 @@ export class WishlistsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishlist = await this.wishlistsService.findOne({ where: { id } });
+    const wishlist = await this.wishlistsService.findOneById(id);
+
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
     }
+
     await this.wishlistsService.updateById(id, updateWishlistDto);
   }
 
@@ -77,9 +83,11 @@ export class WishlistsController {
         owner: true,
       },
     });
+
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
     }
+
     return wishlist;
   }
 
@@ -88,10 +96,13 @@ export class WishlistsController {
     @Req() req: Request & { user: { id: number } },
     @Body() wishlist: CreateWishlistRequestDto,
   ): Promise<Wishlist> {
-    console.log('wishlist', wishlist)
-    const { itemsId, ...rest } = wishlist;
+    const user = await this.usersService.findOneById(req.user.id);
 
-    console.log(itemsId)
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    const { itemsId, ...rest } = wishlist;
 
     const wishes = await this.wishesService.findMany({
       where: {
@@ -99,14 +110,10 @@ export class WishlistsController {
       },
     });
 
-    console.log(wishes);
-
     return this.wishlistsService.create({
       ...rest,
       items: wishes,
-      owner: {
-        id: req.user.id,
-      },
+      owner: user,
     });
   }
 
