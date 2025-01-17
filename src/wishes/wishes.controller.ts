@@ -100,6 +100,7 @@ export class WishesController {
       owner: {
         id: req.user.id,
       },
+      wishlists: [],
     });
   }
 

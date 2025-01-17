@@ -3,9 +3,10 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
+  ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinTable,
 } from 'typeorm';
 import {
   IsOptional,
@@ -61,6 +62,7 @@ export class Wishlist {
   @ManyToOne(() => User, (user) => user.wishlists)
   owner: User; // ссылка на пользователя, который добавил список пожеланий
 
-  @OneToMany(() => Wish, (wish) => wish.id)
+  @ManyToMany(() => Wish, (wish) => wish.wishlists)
+  @JoinTable()
   items: Wish[]; // содержит набор ссылок на подарки
 }

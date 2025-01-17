@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -18,6 +20,7 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
@@ -96,6 +99,10 @@ export class Wish {
 
   @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей
+
+  @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
+  @JoinTable()
+  wishlists: Wishlist[]; // массив ссылок на вишлисты
 
   @Column({
     default: 0,

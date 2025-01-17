@@ -10,6 +10,7 @@ export enum ErrorCode {
   OfferNotFound = 106,
   WishlistNotFound = 107,
   Conflict = 108,
+  TooMuchMoney = 109,
 }
 
 export const code2message = new Map<ErrorCode, string>([
@@ -22,6 +23,7 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.OfferNotFound, 'Offer not found'],
   [ErrorCode.WishlistNotFound, 'Wishlist not found'],
   [ErrorCode.Conflict, 'Conflict'],
+  [ErrorCode.TooMuchMoney, 'Сумма заявки больше чем осталось собрать'],
 ]);
 
 export const code2status = new Map<ErrorCode, HttpStatus>([
@@ -34,4 +36,5 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.OfferNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.WishlistNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.Conflict, HttpStatus.CONFLICT],
+  [ErrorCode.TooMuchMoney, HttpStatus.CONFLICT],
 ]);

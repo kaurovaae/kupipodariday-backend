@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
   ParseIntPipe,
@@ -53,7 +52,7 @@ export class UsersController {
     type: [Wish],
   })
   @Get('me/wishes')
-  async getMyWishes(@Req() req: Request & { user: { id: number } }) {
+  async getOwnWishes(@Req() req: Request & { user: { id: number } }) {
     return this.wishesService.findMany({
       where: {
         owner: {
@@ -150,8 +149,7 @@ export class UsersController {
     example: 'Иван',
   })
   @Post('find')
-  async findMany(@Query('query') query: string) {
-    // TODO: why query is empty?
+  async findMany(@Body('query') query: string) {
     return this.usersService.findMany({
       where: [{ email: query }, { username: query }],
     });

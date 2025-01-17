@@ -74,13 +74,19 @@ export class OffersController {
       throw new ServerException(ErrorCode.WishNotFound);
     }
 
+    const { itemId, amount } = offer;
+
+    const raised = +wish.raised + +amount;
+
+    if (raised > wish.price) {
+      throw new ServerException(ErrorCode.TooMuchMoney);
+    }
+
     // TODO: обернуть в транзакции на случай ошибок
     // TODO: математические операции с деньгами (кейсы копеек)
     // TODO: модели запросов / ответов
 
-    await this.wishesService.updateById(offer.itemId, {
-      raised: +wish.raised + +offer.amount,
-    });
+    await this.wishesService.updateById(itemId, { raised });
 
     return this.offersService.create({
       item: {
