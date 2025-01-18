@@ -28,6 +28,7 @@ import { ErrorCode } from '../exceptions/error-codes';
 import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
+import { FindOfferDto } from './dto/find-offer.dto';
 import { UsersService } from '../users/users.service';
 
 @ApiBearerAuth()
@@ -95,7 +96,7 @@ export class OffersController {
 
   @ApiResponse({
     description: 'Возвращает оффер по указанному id',
-    type: Offer,
+    type: FindOfferDto,
   })
   @ApiParam({
     name: 'id',
@@ -174,7 +175,7 @@ export class OffersController {
 
   @ApiResponse({
     description: 'Возвращает список всех офферов',
-    type: [Offer],
+    type: [FindOfferDto],
   })
   @Get()
   findAll(): Promise<Offer[]> {
