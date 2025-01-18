@@ -21,11 +21,13 @@ import {
 } from '@nestjs/swagger';
 import { WishesService } from './wishes.service';
 import { Wish } from './entities/wish.entity';
-import { FindWishDto } from './dto/find-wish.dto';
+import {
+  FindWishDto,
+  LastWishResponseDto,
+  TopWishResponseDto,
+} from './dto/find-wish.dto';
 import { CreateWishRequestDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
-import { TopWishResponseDto } from './dto/top-wish-response.dto';
-import { LastWishResponseDto } from './dto/last-wish-response.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';

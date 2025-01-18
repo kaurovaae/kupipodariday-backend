@@ -49,7 +49,7 @@ export class UsersService {
   async updateById(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<UpdateUserDto> {
+  ): Promise<FindUserDto> {
     const { password, ...rest } = updateUserDto;
     if (password) {
       const hash = await bcrypt.hash(password, 10);

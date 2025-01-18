@@ -33,3 +33,16 @@ export class FindWishDto extends OmitType(Wish, [
 ]) {
   offers: Offer[] | ShortInfo[];
 }
+
+export class LastWishResponseDto extends OmitType(Wish, [
+  'id',
+  'updatedAt',
+  'offers',
+  'copied',
+]) {}
+
+export class TopWishResponseDto extends OmitType(Wish, [
+  'id',
+  'updatedAt',
+  'offers',
+]) {}

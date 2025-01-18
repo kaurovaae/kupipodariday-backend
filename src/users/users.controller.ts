@@ -22,13 +22,16 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { GetUserDto } from './dto/get-user.dto';
 import { NoValidUserResponseDto } from './dto/no-valid-user-response.dto';
 import { User } from './entities/user.entity';
 import { Wish } from '../wishes/entities/wish.entity';
 import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
-import { FindUserDto } from './dto/find-user.dto';
+import {
+  FindOwnUserDto,
+  FindUserDto,
+  FindUserDtoRequest,
+} from './dto/find-user.dto';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
 
@@ -92,7 +95,7 @@ export class UsersController {
   @Get('me')
   async getOwnInfo(
     @Req() req: Request & { user: { id: number } },
-  ): Promise<GetUserDto> {
+  ): Promise<FindOwnUserDto> {
     return this.usersService.findOne({ id: req.user.id });
   }
 
@@ -141,10 +144,9 @@ export class UsersController {
     description: 'Возвращает пользователя с указанными email или username',
     type: User,
   })
-  @ApiParam({
-    name: 'query',
+  @ApiBody({
     description: 'Имя или email пользователя',
-    example: 'user',
+    type: FindUserDtoRequest,
   })
   @Post('find')
   async findMany(@Body('query') query: string) {
