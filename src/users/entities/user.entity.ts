@@ -34,7 +34,10 @@ export class User {
   })
   username: string; // уникальное имя пользователя
 
-  @ApiProperty({ description: 'Описание пользователя', example: 'student' })
+  @ApiProperty({
+    description: 'Описание пользователя',
+    example: 'Пока ничего не рассказал о себе',
+  })
   @IsString()
   @IsOptional()
   @Length(2, 200)

@@ -1,36 +1,39 @@
 import { HttpStatus } from '@nestjs/common';
 
 export enum ErrorCode {
-  LoginOrPasswordIncorrect = 100,
-  UserAlreadyExists = 101,
-  UserNotFound = 102,
-  Unauthorized = 103,
-  NotFound = 104,
-  Conflict = 105,
+  LoginOrPasswordIncorrect = 'LoginOrPasswordIncorrect',
+  UserAlreadyExists = 'UserAlreadyExists',
+  UserNotFound = 'UserNotFound',
+  Unauthorized = 'Unauthorized',
+  NotFound = 'NotFound',
+  Conflict = 'Conflict',
 
-  WishNotFound = 200,
-  WishesNotFound = 201,
-  ConflictUpdateWishPrice = 202,
-  ConflictUpdateOfferTooMuchMoney = 203,
-  ConflictCreateOwnWishOffer = 204,
-  WishRaisedIsRatherThanPrice = 205,
+  WishNotFound = 'WishNotFound',
+  WishesNotFound = 'WishesNotFound',
+  ConflictUpdateWishPrice = 'ConflictUpdateWishPrice',
+  ConflictUpdateOfferTooMuchMoney = 'ConflictUpdateOfferTooMuchMoney',
+  ConflictCreateOwnWishOffer = 'ConflictCreateOwnWishOffer',
+  WishRaisedIsRatherThanPrice = 'WishRaisedIsRatherThanPrice',
 
-  WishlistNotFound = 300,
+  WishlistNotFound = 'WishlistNotFound',
 
-  OfferNotFound = 400,
-  EmptyItemsId = 401,
+  OfferNotFound = 'OfferNotFound',
+  EmptyItemsId = 'EmptyItemsId',
 
-  ConflictUpdateOtherProfile = 500,
-  ConflictDeleteOtherProfile = 501,
-  ConflictUpdateOtherWish = 502,
-  ConflictDeleteOtherWish = 503,
-  ConflictUpdateOtherWishlist = 504,
-  ConflictDeleteOtherWishlist = 505,
+  ConflictUpdateOtherProfile = 'ConflictUpdateOtherProfile',
+  ConflictDeleteOtherProfile = 'ConflictDeleteOtherProfile',
+  ConflictUpdateOtherWish = 'ConflictUpdateOtherWish',
+  ConflictDeleteOtherWish = 'ConflictDeleteOtherWish',
+  ConflictUpdateOtherWishlist = 'ConflictUpdateOtherWishlist',
+  ConflictDeleteOtherWishlist = 'ConflictDeleteOtherWishlist',
 }
 
 export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.LoginOrPasswordIncorrect, 'Некорректный логин или пароль'],
-  [ErrorCode.UserAlreadyExists, 'Пользователь уже существует'],
+  [
+    ErrorCode.UserAlreadyExists,
+    'Пользователь с таким email или username уже зарегистрирован',
+  ],
   [ErrorCode.Unauthorized, 'Unauthorized'],
   [ErrorCode.UserNotFound, 'Пользователь не найден'],
   [ErrorCode.NotFound, 'Not found'],

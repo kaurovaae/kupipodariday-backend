@@ -12,4 +12,5 @@ export class FindOwnUserDto extends OmitType(User, [
   'wishes',
   'offers',
   'wishlists',
+  'password',
 ]) {}

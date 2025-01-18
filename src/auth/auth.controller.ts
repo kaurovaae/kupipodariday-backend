@@ -1,5 +1,10 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { ErrorCode } from '../exceptions/error-codes';
 import { LocalGuard } from '../guards/local.guard';
@@ -7,6 +12,7 @@ import { UsersService } from '../users/users.service';
 import { ServerException } from '../exceptions/server.exception';
 import { SigninUserDto, SigninUserResponseDto } from './dto/signin-user.dto';
 import { SignupUserDto, SignupUserResponseDto } from './dto/signup-user.dto';
+import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
 
 @ApiTags('auth')
 @Controller('')
@@ -25,6 +31,10 @@ export class AuthController {
     status: 200,
     description: 'Авторизовывает пользователя по указанным username и password',
     type: SigninUserResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+    type: NoValidUserResponseDto,
   })
   @ApiBody({
     description: 'Данные авторизации пользователя',
