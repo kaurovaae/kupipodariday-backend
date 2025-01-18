@@ -47,10 +47,8 @@ export class OffersService {
   }
 
   async updateById(id: number, updateOfferDto: UpdateOfferDto) {
-    return this.offersRepository.save({
-      ...updateOfferDto,
-      id,
-    });
+    await this.offersRepository.update({ id }, updateOfferDto);
+    return this.offersRepository.findOneBy({ id });
   }
 
   async removeById(id: number) {
