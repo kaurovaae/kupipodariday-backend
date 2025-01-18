@@ -17,15 +17,13 @@ export class AuthService {
   }
 
   async validatePassword(username: string, password: string) {
-    const user = await this.usersService.findOne({
-      where: {
-        username,
-      },
-      select: {
+    const user = await this.usersService.findOne(
+      { username },
+      {
         id: true,
         password: true,
       },
-    });
+    );
 
     if (!user) {
       return null;

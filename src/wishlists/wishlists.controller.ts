@@ -96,13 +96,17 @@ export class WishlistsController {
     @Req() req: Request & { user: { id: number } },
     @Body() wishlist: CreateWishlistRequestDto,
   ): Promise<Wishlist> {
-    const user = await this.usersService.findOneById(req.user.id);
+    const user = await this.usersService.findOne({ id: req.user.id });
 
     if (!user) {
       throw new ServerException(ErrorCode.Unauthorized);
     }
 
-    const { itemsId, ...rest } = wishlist;
+    const { itemsId, image, name, description } = wishlist;
+
+    if (!itemsId) {
+      throw new ServerException(ErrorCode.EmptyItemsId);
+    }
 
     const wishes = await this.wishesService.findMany({
       where: {
@@ -110,8 +114,14 @@ export class WishlistsController {
       },
     });
 
+    if (!wishes) {
+      throw new ServerException(ErrorCode.WishesNotFound);
+    }
+
     return this.wishlistsService.create({
-      ...rest,
+      image,
+      name,
+      description,
       items: wishes,
       owner: user,
     });

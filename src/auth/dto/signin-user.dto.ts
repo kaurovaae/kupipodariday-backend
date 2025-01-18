@@ -4,7 +4,7 @@ import { User } from '../../users/entities/user.entity';
 export class SigninUserResponseDto {
   @ApiProperty({
     description: 'Access token',
-    example: 'generatedaccesstoken',
+    example: 'generatedAccessToken',
   })
   access_token: string;
 }

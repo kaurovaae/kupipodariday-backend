@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiExtraModels,
   ApiParam,
   ApiResponse,
@@ -61,11 +62,16 @@ export class UsersController {
     description: 'Возвращает список подарков пользователя с заданным username',
     type: [Wish],
   })
+  @ApiParam({
+    name: 'username',
+    description: 'Имя пользователя',
+    example: 'user',
+  })
   @Get(':username/wishes')
   async getUserWishes(@Param('username') username: string) {
-    const user = await this.usersService.findOneByUsername(
-      username.toLowerCase(),
-    );
+    const user = await this.usersService.findOne({
+      username: username.toLowerCase(),
+    });
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
@@ -83,20 +89,24 @@ export class UsersController {
   async getOwnInfo(
     @Req() req: Request & { user: { id: number } },
   ): Promise<GetUserDto> {
-    return this.usersService.findOneById(req.user.id);
+    return this.usersService.findOne({ id: req.user.id });
   }
 
   @ApiResponse({
     status: 200,
     description: 'Обновляет данные пользователя',
-    type: User,
+    type: UpdateUserDto,
+  })
+  @ApiBody({
+    description: 'Изменяемые поля пользователя',
+    type: UpdateUserDto,
   })
   @Patch('me')
   async updateOwnInfo(
     @Req() req: Request & { user: { id: number } },
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.update(req.user.id, updateUserDto);
+    return this.usersService.updateById(req.user.id, updateUserDto);
   }
 
   @ApiResponse({
@@ -107,21 +117,19 @@ export class UsersController {
   @ApiParam({
     name: 'username',
     description: 'Имя пользователя',
-    example: 'Иван',
+    example: 'user',
   })
   @Get(':username')
   findByUsername(@Param('username') username: string): Promise<FindUserDto> {
-    return this.usersService.findOne({
-      where: {
-        username: username.toLowerCase(),
-      },
-      select: {
+    return this.usersService.findOne(
+      { username: username.toLowerCase() },
+      {
         id: true,
         username: true,
         avatar: true,
         about: true,
       },
-    });
+    );
   }
 
   @ApiResponse({
@@ -132,7 +140,7 @@ export class UsersController {
   @ApiParam({
     name: 'query',
     description: 'Имя или email пользователя',
-    example: 'Иван',
+    example: 'user',
   })
   @Post('find')
   async findMany(@Body('query') query: string) {
@@ -141,9 +149,18 @@ export class UsersController {
     });
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Удаляет пользователя с заданным id',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id пользователя',
+    example: '1',
+  })
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.usersService.findOneById(id);
+    const user = await this.usersService.findOne({ id });
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
@@ -152,12 +169,25 @@ export class UsersController {
     await this.usersService.removeById(id);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Обновляет данные пользователя с заданным id',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id пользователя',
+    example: '1',
+  })
+  @ApiBody({
+    description: 'Изменяемые поля пользователя',
+    type: UpdateUserDto,
+  })
   @Patch(':id')
   async updateById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const user = await this.usersService.findOneById(id);
+    const user = await this.usersService.findOne({ id });
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
@@ -166,6 +196,11 @@ export class UsersController {
     await this.usersService.updateById(id, updateUserDto);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Возвращает список существующих пользователей',
+    type: [FindUserDto],
+  })
   @Get()
   findAll(): Promise<FindUserDto[]> {
     return this.usersService.findMany({});

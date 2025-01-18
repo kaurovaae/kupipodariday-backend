@@ -72,7 +72,7 @@ export class OffersController {
     @Req() req: Request & { user: { id: number } },
     @Body() offer: CreateOfferRequestDto,
   ): Promise<Offer> {
-    const user = await this.usersService.findOneById(req.user.id);
+    const user = await this.usersService.findOne({ id: req.user.id });
 
     if (!user) {
       throw new ServerException(ErrorCode.Unauthorized);

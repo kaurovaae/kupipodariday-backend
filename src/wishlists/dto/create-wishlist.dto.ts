@@ -29,9 +29,4 @@ export class CreateWishlistDto extends OmitType(Wishlist, [
   'id',
   'createdAt',
   'updatedAt',
-  'owner',
-]) {
-  owner: {
-    id: number;
-  };
-}
+]) {}

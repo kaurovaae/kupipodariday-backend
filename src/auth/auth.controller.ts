@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { ErrorCode } from '../exceptions/error-codes';
 import { LocalGuard } from '../guards/local.guard';
@@ -21,6 +21,15 @@ export class AuthController {
    * Если пароль будет верным, id пользователя окажется в объекте req.user
    */
   @UseGuards(LocalGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Авторизовывает пользователя по указанным username и password',
+    type: SigninUserResponseDto,
+  })
+  @ApiBody({
+    description: 'Данные авторизации пользователя',
+    type: SigninUserDto,
+  })
   @Post('signin')
   signin(
     @Body() signinUserDto: SigninUserDto,
@@ -30,14 +39,22 @@ export class AuthController {
     return this.authService.auth(req.user.id);
   }
 
+  @ApiResponse({
+    status: 201,
+    description:
+      'Регистрирует пользователя с указаннымми данными и возвращает токен',
+    type: SigninUserResponseDto,
+  })
+  @ApiBody({
+    description: 'Модель регистрации пользователя',
+    type: SignupUserDto,
+  })
   @Post('signup')
   async signup(
     @Body() signupUserDto: SignupUserDto,
   ): Promise<SignupUserResponseDto> {
     const isExists = await this.usersService.findOne({
-      where: {
-        username: signupUserDto.username.toLowerCase(),
-      },
+      username: signupUserDto.username.toLowerCase(),
     });
 
     if (isExists) {

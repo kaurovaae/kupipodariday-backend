@@ -49,7 +49,7 @@ export class WishesController {
   @ApiResponse({
     status: 200,
     description: 'Возвращает 40 последних добавленных подарков',
-    type: [Wish],
+    type: [LastWishResponseDto],
   })
   @Get('last')
   findLast(): Promise<LastWishResponseDto[]> {
@@ -62,7 +62,7 @@ export class WishesController {
   @ApiResponse({
     status: 200,
     description: 'Возвращает 20 популярных подарков',
-    type: [Wish],
+    type: [TopWishResponseDto],
   })
   @Get('top')
   findTop(): Promise<TopWishResponseDto[]> {
@@ -82,7 +82,7 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const user = await this.usersService.findOneById(req.user.id);
+    const user = await this.usersService.findOne({ id: req.user.id });
 
     if (!user) {
       throw new ServerException(ErrorCode.Unauthorized);
@@ -253,7 +253,7 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Body() wish: CreateWishRequestDto,
   ): Promise<Wish> {
-    const user = await this.usersService.findOneById(req.user.id);
+    const user = await this.usersService.findOne({ id: req.user.id });
 
     if (!user) {
       throw new ServerException(ErrorCode.Unauthorized);

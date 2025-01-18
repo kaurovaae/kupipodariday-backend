@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -24,7 +23,6 @@ import { Wishlist } from '../../wishlists/entities/wishlist.entity';
 
 @Entity()
 export class Wish {
-  // нельзя юзать many to one, тк ломается поиск по id
   @ApiProperty({ description: 'Уникальный id подарка' })
   @PrimaryGeneratedColumn()
   id: number;
@@ -101,7 +99,6 @@ export class Wish {
   offers: Offer[]; // массив ссылок на заявки скинуться от других пользователей
 
   @ManyToMany(() => Wishlist, (wishlist) => wishlist.items)
-  @JoinTable()
   wishlists: Wishlist[]; // массив ссылок на вишлисты
 
   @Column({

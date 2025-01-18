@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
-import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
+import {
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,16 +20,16 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async findOne(options: FindOneOptions): Promise<User> {
-    return this.usersRepository.findOne(options);
-  }
-
-  async findOneById(id: number): Promise<User> {
-    return this.usersRepository.findOneBy({ id });
-  }
-
-  async findOneByUsername(username: string): Promise<User> {
-    return this.usersRepository.findOneBy({ username });
+  async findOne(
+    options: FindOptionsWhere<User>,
+    fields?: FindOptionsSelect<User>,
+    join?: FindOptionsRelations<User>,
+  ): Promise<User> {
+    return this.usersRepository.findOne({
+      where: options,
+      select: fields,
+      relations: join,
+    });
   }
 
   async findMany(options: FindManyOptions): Promise<FindUserDto[]> {
@@ -42,7 +46,7 @@ export class UsersService {
     });
   }
 
-  async update(
+  async updateById(
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<UpdateUserDto> {
@@ -56,10 +60,6 @@ export class UsersService {
     }
 
     return this.usersRepository.findOneBy({ id });
-  }
-
-  async updateById(id: number, updateUserDto: UpdateUserDto) {
-    return this.usersRepository.update({ id }, updateUserDto);
   }
 
   async removeById(id: number) {
