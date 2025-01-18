@@ -145,9 +145,6 @@ export class OffersController {
       throw new ServerException(ErrorCode.TooMuchMoney);
     }
 
-    // TODO: обернуть в транзакции на случай ошибок
-    // TODO: математические операции с деньгами (кейсы копеек)
-
     await this.wishesService.updateById(itemId, { raised });
 
     return this.offersService.create({
@@ -156,21 +153,6 @@ export class OffersController {
       amount: offer.amount,
       hidden: offer.hidden,
     });
-
-    // const queryRunner = this.dataSource.createQueryRunner();
-    //
-    // await queryRunner.connect();
-    // await queryRunner.startTransaction();
-    // try {
-    //   // Сохраняем всех пользователей
-    //   await Promise.all(users.map((user)=>queryRunner.manager.save(user));
-    //
-    //   await queryRunner.commitTransaction();
-    // } catch (err) {
-    //   await queryRunner.rollbackTransaction();
-    // } finally {
-    //   await queryRunner.release();
-    // }
   }
 
   @ApiResponse({

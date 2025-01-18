@@ -102,8 +102,6 @@ export class WishesController {
       throw new ServerException(ErrorCode.WishNotFound);
     }
 
-    // TODO: обернуть в транзакции на случай ошибок
-
     await this.wishesService.updateById(id, {
       copied: wish.copied + 1,
     });
