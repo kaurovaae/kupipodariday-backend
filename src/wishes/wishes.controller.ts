@@ -269,6 +269,10 @@ export class WishesController {
       throw new ServerException(ErrorCode.Unauthorized);
     }
 
+    if (wish.raised && wish.raised > wish.price) {
+      throw new ServerException(ErrorCode.WishRaisedIsRatherThanPrice);
+    }
+
     return this.wishesService.create({
       ...wish,
       owner: user,

@@ -1,19 +1,16 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Post,
   Param,
   ParseIntPipe,
-  Patch,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { OffersService } from './offers.service';
 import { Offer } from './entities/offer.entity';
 import { CreateOfferRequestDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -45,54 +42,6 @@ export class OffersController {
     private wishesService: WishesService,
     private usersService: UsersService,
   ) {}
-
-  @ApiResponse({
-    status: 200,
-    description: 'Удаляет оффер с заданным id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Id оффера',
-    example: '1',
-  })
-  @Delete(':id')
-  async removeById(@Param('id', ParseIntPipe) id: number) {
-    const offer = await this.offersService.findOne({ id });
-
-    if (!offer) {
-      throw new ServerException(ErrorCode.OfferNotFound);
-    }
-
-    await this.offersService.removeById(id);
-  }
-
-  @ApiResponse({
-    status: 200,
-    description: 'Обновляет данные оффера с заданным id',
-    type: Offer,
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Id оффера',
-    example: '1',
-  })
-  @ApiBody({
-    description: 'Изменяемые данные оффера',
-    type: UpdateOfferDto,
-  })
-  @Patch(':id')
-  async updateById(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateOfferDto: UpdateOfferDto,
-  ) {
-    const offer = await this.offersService.findOne({ id });
-
-    if (!offer) {
-      throw new ServerException(ErrorCode.OfferNotFound);
-    }
-
-    return this.offersService.updateById(id, updateOfferDto);
-  }
 
   @ApiResponse({
     description: 'Возвращает оффер по указанному id',
@@ -131,10 +80,19 @@ export class OffersController {
       throw new ServerException(ErrorCode.Unauthorized);
     }
 
-    const wish = await this.wishesService.findOne({ id: offer.itemId });
+    const wish = await this.wishesService.findOne(
+      { id: offer.itemId },
+      { owner: { id: true } },
+      { owner: true },
+    );
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
+    }
+
+    if (wish.owner?.id === req.user.id) {
+      // Пользователю нельзя вносить деньги на собственные подарки
+      throw new ServerException(ErrorCode.ConflictCreateOwnWishOffer);
     }
 
     const { itemId, amount } = offer;
@@ -142,7 +100,7 @@ export class OffersController {
     const raised = +wish.raised + +amount;
 
     if (raised > wish.price) {
-      throw new ServerException(ErrorCode.TooMuchMoney);
+      throw new ServerException(ErrorCode.ConflictUpdateOfferTooMuchMoney);
     }
 
     await this.wishesService.updateById(itemId, { raised });

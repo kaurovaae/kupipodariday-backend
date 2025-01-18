@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto/create-offer.dto';
-import { UpdateOfferDto } from './dto/update-offer.dto';
 import { Offer } from './entities/offer.entity';
 
 @Injectable()
@@ -46,12 +45,14 @@ export class OffersService {
     return this.offersRepository.save(createOfferDto);
   }
 
-  async updateById(id: number, updateOfferDto: UpdateOfferDto) {
-    await this.offersRepository.update({ id }, updateOfferDto);
-    return this.offersRepository.findOneBy({ id });
-  }
-
-  async removeById(id: number) {
-    return this.offersRepository.delete({ id });
-  }
+  // Пользователю нельзя удалять и редактировать заявки (передумать тут нельзя)
+  //
+  // async updateById(id: number, updateOfferDto: UpdateOfferDto) {
+  //   await this.offersRepository.update({ id }, updateOfferDto);
+  //   return this.offersRepository.findOneBy({ id });
+  // }
+  //
+  // async removeById(id: number) {
+  //   return this.offersRepository.delete({ id });
+  // }
 }

@@ -8,22 +8,24 @@ export enum ErrorCode {
   NotFound = 104,
   Conflict = 105,
 
-  WishNotFound = 106,
-  WishesNotFound = 107,
-  ConflictUpdateWishPrice = 108,
-  TooMuchMoney = 109,
+  WishNotFound = 200,
+  WishesNotFound = 201,
+  ConflictUpdateWishPrice = 202,
+  ConflictUpdateOfferTooMuchMoney = 203,
+  ConflictCreateOwnWishOffer = 204,
+  WishRaisedIsRatherThanPrice = 205,
 
-  WishlistNotFound = 110,
+  WishlistNotFound = 300,
 
-  OfferNotFound = 111,
-  EmptyItemsId = 112,
+  OfferNotFound = 400,
+  EmptyItemsId = 401,
 
-  ConflictUpdateOtherProfile = 113,
-  ConflictDeleteOtherProfile = 114,
-  ConflictUpdateOtherWish = 115,
-  ConflictDeleteOtherWish = 116,
-  ConflictUpdateOtherWishlist = 117,
-  ConflictDeleteOtherWishlist = 118,
+  ConflictUpdateOtherProfile = 500,
+  ConflictDeleteOtherProfile = 501,
+  ConflictUpdateOtherWish = 502,
+  ConflictDeleteOtherWish = 503,
+  ConflictUpdateOtherWishlist = 504,
+  ConflictDeleteOtherWishlist = 505,
 }
 
 export const code2message = new Map<ErrorCode, string>([
@@ -33,10 +35,17 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.UserNotFound, 'Пользователь не найден'],
   [ErrorCode.NotFound, 'Not found'],
   [ErrorCode.WishNotFound, 'Подарок не найден'],
+  [
+    ErrorCode.WishRaisedIsRatherThanPrice,
+    'Сумма предварительного сбора не может быть больше стоимости подарка',
+  ],
   [ErrorCode.OfferNotFound, 'Заявка не найдена'],
   [ErrorCode.WishlistNotFound, 'Вишлист не найден'],
   [ErrorCode.Conflict, 'Conflict'],
-  [ErrorCode.TooMuchMoney, 'Сумма заявки больше чем осталось собрать'],
+  [
+    ErrorCode.ConflictUpdateOfferTooMuchMoney,
+    'Сумма заявки больше, чем осталось собрать',
+  ],
   [ErrorCode.EmptyItemsId, 'Отсутствует itemsId'],
   [ErrorCode.WishesNotFound, 'Подарки с указанными id не найдены'],
   [ErrorCode.ConflictUpdateOtherProfile, 'Нельзя редактировать чужой профиль'],
@@ -46,6 +55,7 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.ConflictUpdateOtherWishlist, 'Нельзя редактировать чужой вишлист'],
   [ErrorCode.ConflictDeleteOtherWishlist, 'Нельзя удалить чужой вишлист'],
   [ErrorCode.ConflictUpdateWishPrice, 'Нельзя изменить стоимость подарка'],
+  [ErrorCode.ConflictCreateOwnWishOffer, 'Нельзя скинуться на свой подарок'],
 ]);
 
 export const code2status = new Map<ErrorCode, HttpStatus>([
@@ -58,7 +68,7 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.OfferNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.WishlistNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.Conflict, HttpStatus.CONFLICT],
-  [ErrorCode.TooMuchMoney, HttpStatus.CONFLICT],
+  [ErrorCode.ConflictUpdateOfferTooMuchMoney, HttpStatus.CONFLICT],
   [ErrorCode.EmptyItemsId, HttpStatus.BAD_REQUEST],
   [ErrorCode.WishesNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.ConflictUpdateOtherProfile, HttpStatus.BAD_REQUEST],
@@ -68,4 +78,5 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.ConflictUpdateOtherWishlist, HttpStatus.BAD_REQUEST],
   [ErrorCode.ConflictDeleteOtherWishlist, HttpStatus.BAD_REQUEST],
   [ErrorCode.ConflictUpdateWishPrice, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictCreateOwnWishOffer, HttpStatus.BAD_REQUEST],
 ]);
