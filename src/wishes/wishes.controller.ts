@@ -279,12 +279,12 @@ export class WishesController {
     });
   }
 
-  @ApiResponse({
-    description: 'Возвращает список всех подарков',
-    type: [Wish],
-  })
-  @Get()
-  findAll(): Promise<Wish[]> {
-    return this.wishesService.findMany({});
-  }
+  // @ApiResponse({
+  //   description: 'Возвращает список всех подарков',
+  //   type: [Wish],
+  // })
+  // @Get()
+  // findAll(): Promise<Wish[]> {
+  //   return this.wishesService.findMany({});
+  // }
 }

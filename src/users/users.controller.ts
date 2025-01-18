@@ -2,10 +2,10 @@ import { Request } from 'express';
 import {
   Body,
   Controller,
-  Delete,
+  // Delete,
   Get,
   Param,
-  ParseIntPipe,
+  // ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -155,72 +155,72 @@ export class UsersController {
     });
   }
 
-  @ApiResponse({
-    status: 200,
-    description: 'Удаляет пользователя с заданным id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Id пользователя',
-    example: '1',
-  })
-  @Delete(':id')
-  async removeById(
-    @Req() req: Request & { user: { id: number } },
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    const user = await this.usersService.findOne({ id });
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Удаляет пользователя с заданным id',
+  // })
+  // @ApiParam({
+  //   name: 'id',
+  //   description: 'Id пользователя',
+  //   example: '1',
+  // })
+  // @Delete(':id')
+  // async removeById(
+  //   @Req() req: Request & { user: { id: number } },
+  //   @Param('id', ParseIntPipe) id: number,
+  // ) {
+  //   const user = await this.usersService.findOne({ id });
+  //
+  //   if (!user) {
+  //     throw new ServerException(ErrorCode.UserNotFound);
+  //   }
+  //
+  //   if (user.id !== req.user.id) {
+  //     throw new ServerException(ErrorCode.ConflictDeleteOtherProfile);
+  //   }
+  //
+  //   await this.usersService.removeById(id);
+  // }
 
-    if (!user) {
-      throw new ServerException(ErrorCode.UserNotFound);
-    }
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Обновляет данные пользователя с заданным id',
+  // })
+  // @ApiParam({
+  //   name: 'id',
+  //   description: 'Id пользователя',
+  //   example: '1',
+  // })
+  // @ApiBody({
+  //   description: 'Изменяемые данные пользователя',
+  //   type: UpdateUserDto,
+  // })
+  // @Patch(':id')
+  // async updateById(
+  //   @Req() req: Request & { user: { id: number } },
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() updateUserDto: UpdateUserDto,
+  // ) {
+  //   const user = await this.usersService.findOne({ id });
+  //
+  //   if (!user) {
+  //     throw new ServerException(ErrorCode.UserNotFound);
+  //   }
+  //
+  //   if (user.id !== req.user.id) {
+  //     throw new ServerException(ErrorCode.ConflictUpdateOtherProfile);
+  //   }
+  //
+  //   await this.usersService.updateById(id, updateUserDto);
+  // }
 
-    if (user.id !== req.user.id) {
-      throw new ServerException(ErrorCode.ConflictDeleteOtherProfile);
-    }
-
-    await this.usersService.removeById(id);
-  }
-
-  @ApiResponse({
-    status: 200,
-    description: 'Обновляет данные пользователя с заданным id',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Id пользователя',
-    example: '1',
-  })
-  @ApiBody({
-    description: 'Изменяемые данные пользователя',
-    type: UpdateUserDto,
-  })
-  @Patch(':id')
-  async updateById(
-    @Req() req: Request & { user: { id: number } },
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    const user = await this.usersService.findOne({ id });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.UserNotFound);
-    }
-
-    if (user.id !== req.user.id) {
-      throw new ServerException(ErrorCode.ConflictUpdateOtherProfile);
-    }
-
-    await this.usersService.updateById(id, updateUserDto);
-  }
-
-  @ApiResponse({
-    status: 200,
-    description: 'Возвращает список существующих пользователей',
-    type: [FindUserDto],
-  })
-  @Get()
-  findAll(): Promise<FindUserDto[]> {
-    return this.usersService.findMany({});
-  }
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Возвращает список существующих пользователей',
+  //   type: [FindUserDto],
+  // })
+  // @Get()
+  // findAll(): Promise<FindUserDto[]> {
+  //   return this.usersService.findMany({});
+  // }
 }
