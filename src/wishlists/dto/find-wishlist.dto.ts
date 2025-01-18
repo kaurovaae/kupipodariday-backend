@@ -1,7 +1,7 @@
-import { PickType } from '@nestjs/swagger';
+import { OmitType } from '@nestjs/swagger';
 import { Wishlist } from '../entities/wishlist.entity';
 
-export class FindWishlistDto extends PickType(Wishlist, []) {
+export class FindWishlistDto extends OmitType(Wishlist, []) {
   owner: {
     id: number;
   };

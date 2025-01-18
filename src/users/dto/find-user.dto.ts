@@ -1,4 +1,4 @@
-import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 
 export class FindUserDtoRequest {
@@ -6,7 +6,7 @@ export class FindUserDtoRequest {
   query: string;
 }
 
-export class FindUserDto extends PickType(User, ['email', 'password']) {}
+export class FindUserDto extends OmitType(User, ['email', 'password']) {}
 
 export class FindOwnUserDto extends OmitType(User, [
   'wishes',
