@@ -63,6 +63,7 @@ export class UsersService {
   }
 
   async removeById(id: number) {
+    // TODO: delete relations
     return this.usersRepository.delete({ id });
   }
 }

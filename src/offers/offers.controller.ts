@@ -78,9 +78,7 @@ export class OffersController {
       throw new ServerException(ErrorCode.Unauthorized);
     }
 
-    const wish = await this.wishesService.findOne({
-      where: { id: offer.itemId },
-    });
+    const wish = await this.wishesService.findOne({ id: offer.itemId });
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);

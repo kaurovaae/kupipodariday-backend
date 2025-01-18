@@ -54,7 +54,9 @@ export class UsersController {
   })
   @Get('me/wishes')
   async getOwnWishes(@Req() req: Request & { user: { id: number } }) {
-    return this.wishesService.findManyByOwnerId(req.user.id);
+    return this.wishesService.findMany({
+      owner: { id: req.user.id },
+    });
   }
 
   @ApiResponse({
@@ -77,7 +79,9 @@ export class UsersController {
       throw new ServerException(ErrorCode.UserNotFound);
     }
 
-    return this.wishesService.findManyByOwnerId(user.id);
+    return this.wishesService.findMany({
+      owner: { id: user.id },
+    });
   }
 
   @ApiResponse({
@@ -98,7 +102,7 @@ export class UsersController {
     type: UpdateUserDto,
   })
   @ApiBody({
-    description: 'Изменяемые поля пользователя',
+    description: 'Изменяемые данные пользователя',
     type: UpdateUserDto,
   })
   @Patch('me')
@@ -179,7 +183,7 @@ export class UsersController {
     example: '1',
   })
   @ApiBody({
-    description: 'Изменяемые поля пользователя',
+    description: 'Изменяемые данные пользователя',
     type: UpdateUserDto,
   })
   @Patch(':id')

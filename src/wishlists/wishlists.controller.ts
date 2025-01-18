@@ -108,11 +108,7 @@ export class WishlistsController {
       throw new ServerException(ErrorCode.EmptyItemsId);
     }
 
-    const wishes = await this.wishesService.findMany({
-      where: {
-        id: In(itemsId),
-      },
-    });
+    const wishes = await this.wishesService.findMany({ id: In(itemsId) });
 
     if (!wishes) {
       throw new ServerException(ErrorCode.WishesNotFound);

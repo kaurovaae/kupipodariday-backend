@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
-import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateWishDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
@@ -14,29 +18,27 @@ export class WishesService {
     private wishesRepository: Repository<Wish>,
   ) {}
 
-  async findAll(): Promise<Wish[]> {
-    return this.wishesRepository.find();
+  async findOne(
+    options: FindOptionsWhere<Wish>,
+    fields?: FindOptionsSelect<Wish>,
+    join?: FindOptionsRelations<Wish>,
+  ): Promise<Wish> {
+    return this.wishesRepository.findOne({
+      where: options,
+      select: fields,
+      relations: join,
+    });
   }
 
-  async findOne(options: FindOneOptions): Promise<Wish> {
-    return this.wishesRepository.findOne(options);
-  }
-
-  async findOneById(id: number): Promise<Wish> {
-    return this.wishesRepository.findOneBy({ id });
-  }
-
-  async findMany(options: FindManyOptions<Wish>): Promise<Wish[]> {
-    return this.wishesRepository.find(options);
-  }
-
-  async findManyByOwnerId(id: number): Promise<Wish[]> {
+  async findMany(
+    options: FindOptionsWhere<Wish>,
+    take?: number,
+    order?: FindOptionsOrder<Wish>,
+  ): Promise<Wish[]> {
     return this.wishesRepository.find({
-      where: {
-        owner: {
-          id,
-        },
-      },
+      where: options,
+      take,
+      order,
     });
   }
 
@@ -44,11 +46,13 @@ export class WishesService {
     return this.wishesRepository.save(createWishDto);
   }
 
-  async removeById(id: number) {
-    return this.wishesRepository.delete({ id });
+  async updateById(id: number, updateWishDto: UpdateWishDto): Promise<Wish> {
+    await this.wishesRepository.update({ id }, updateWishDto);
+    return this.wishesRepository.findOneBy({ id });
   }
 
-  async updateById(id: number, updateWishDto: UpdateWishDto) {
-    return this.wishesRepository.update({ id }, updateWishDto);
+  async removeById(id: number) {
+    // TODO: delete relations
+    return this.wishesRepository.delete({ id });
   }
 }

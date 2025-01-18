@@ -13,12 +13,15 @@ import {
 import { Request } from 'express';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiParam,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { WishesService } from './wishes.service';
 import { Wish } from './entities/wish.entity';
+import { FindWishDto } from './dto/find-wish.dto';
 import { CreateWishRequestDto } from './dto/create-wish.dto';
 import { UpdateWishDto } from './dto/update-wish.dto';
 import { TopWishResponseDto } from './dto/top-wish-response.dto';
@@ -48,14 +51,13 @@ export class WishesController {
 
   @ApiResponse({
     status: 200,
-    description: 'Возвращает 40 последних добавленных подарков',
+    description: 'Возвращает 40 подарков, добавленных недавно',
     type: [LastWishResponseDto],
   })
   @Get('last')
   findLast(): Promise<LastWishResponseDto[]> {
-    return this.wishesService.findMany({
-      take: LAST_WISHES_COUNT,
-      order: { createdAt: 'DESC' },
+    return this.wishesService.findMany({}, LAST_WISHES_COUNT, {
+      createdAt: 'DESC',
     });
   }
 
@@ -66,16 +68,20 @@ export class WishesController {
   })
   @Get('top')
   findTop(): Promise<TopWishResponseDto[]> {
-    return this.wishesService.findMany({
-      take: TOP_WISHES_COUNT,
-      order: { copied: 'DESC' },
+    return this.wishesService.findMany({}, TOP_WISHES_COUNT, {
+      copied: 'DESC',
     });
   }
 
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Копирует подарок текущему пользователю по заданному id',
     type: [Wish],
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id подарка',
+    example: '1',
   })
   @Post(':id/copy')
   async copyWish(
@@ -88,7 +94,7 @@ export class WishesController {
       throw new ServerException(ErrorCode.Unauthorized);
     }
 
-    const wish = await this.wishesService.findOneById(id);
+    const wish = await this.wishesService.findOne({ id });
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
@@ -116,12 +122,17 @@ export class WishesController {
     status: 200,
     description: 'Удаляет подарок с заданным id',
   })
+  @ApiParam({
+    name: 'id',
+    description: 'Id подарка',
+    example: '1',
+  })
   @Delete(':id')
   async removeById(
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOneById(id);
+    const wish = await this.wishesService.findOne({ id });
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
@@ -139,6 +150,16 @@ export class WishesController {
   @ApiResponse({
     status: 200,
     description: 'Обновляет данные подарка с заданным id',
+    type: Wish,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id подарка',
+    example: '1',
+  })
+  @ApiBody({
+    description: 'Изменяемые данные подарка',
+    type: UpdateWishDto,
   })
   @Patch(':id')
   async updateById(
@@ -146,7 +167,7 @@ export class WishesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishDto: UpdateWishDto,
   ) {
-    const wish = await this.wishesService.findOneById(id);
+    const wish = await this.wishesService.findOne({ id });
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
@@ -158,73 +179,61 @@ export class WishesController {
       throw new ServerException(ErrorCode.Conflict);
     }
 
-    await this.wishesService.updateById(id, updateWishDto);
+    return this.wishesService.updateById(id, updateWishDto);
   }
 
   @ApiResponse({
     description: 'Возвращает подарок по указанному id',
-    type: Wish,
+    type: FindWishDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id подарка',
+    example: '1',
   })
   @Get(':id')
   async findOne(
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOne({
-      where: { id },
-      relations: {
+    const wish = await this.wishesService.findOne(
+      { id },
+      {
+        owner: {
+          id: true,
+          avatar: true,
+          username: true,
+        },
+      },
+      {
         owner: true,
         offers: {
           user: true,
         },
       },
-    });
+    );
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
     }
 
-    const {
-      name,
-      image,
-      link,
-      description,
-      price,
-      raised,
-      offers,
-      owner,
-      createdAt,
-    } = wish;
+    const { owner, offers, ...rest } = wish;
 
     if (wish.owner.id === req.user.id) {
       // Для своих подарков: название, изображение и ссылка на товар,
       // прогресс сбора средств и список участников
       return {
-        id,
-        name,
-        image,
-        link,
-        description,
-        price,
-        raised,
+        ...rest,
         offers,
         owner,
-        createdAt,
       };
     }
 
     // Для чужих подарков: отображение описания подарка, а также тех,
     // кто скидывается и по сколько (если участник не захотел скрыть сумму вклада).
     return {
-      id,
-      name,
-      image,
-      link,
-      description,
-      price,
-      raised,
+      ...rest,
       owner,
-      createdAt,
       offers: offers.map((offer) => ({
         createdAt: offer.createdAt,
         name: offer.user.username,
@@ -235,18 +244,13 @@ export class WishesController {
   }
 
   @ApiResponse({
-    description: 'Возвращает список всех подарков',
-    type: [Wish],
-  })
-  @Get()
-  findAll(): Promise<Wish[]> {
-    return this.wishesService.findAll();
-  }
-
-  @ApiResponse({
     status: 201,
     description: 'Возвращает созданный подарок',
     type: Wish,
+  })
+  @ApiBody({
+    description: 'Данные подарка',
+    type: CreateWishRequestDto,
   })
   @Post()
   async create(
@@ -263,5 +267,14 @@ export class WishesController {
       ...wish,
       owner: user,
     });
+  }
+
+  @ApiResponse({
+    description: 'Возвращает список всех подарков',
+    type: [Wish],
+  })
+  @Get()
+  findAll(): Promise<Wish[]> {
+    return this.wishesService.findMany({});
   }
 }
