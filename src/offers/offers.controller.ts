@@ -16,6 +16,9 @@ import { CreateOfferRequestDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -42,9 +45,18 @@ export class OffersController {
     private usersService: UsersService,
   ) {}
 
+  @ApiResponse({
+    status: 200,
+    description: 'Удаляет оффер с заданным id',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id оффера',
+    example: '1',
+  })
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const offer = await this.offersService.findOneById(id);
+    const offer = await this.offersService.findOne({ id });
 
     if (!offer) {
       throw new ServerException(ErrorCode.OfferNotFound);
@@ -53,20 +65,60 @@ export class OffersController {
     await this.offersService.removeById(id);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Обновляет данные оффера с заданным id',
+    type: Offer,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id оффера',
+    example: '1',
+  })
+  @ApiBody({
+    description: 'Изменяемые данные оффера',
+    type: UpdateOfferDto,
+  })
   @Patch(':id')
   async updateById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateOfferDto: UpdateOfferDto,
   ) {
-    const offer = await this.offersService.findOneById(id);
+    const offer = await this.offersService.findOne({ id });
 
     if (!offer) {
       throw new ServerException(ErrorCode.OfferNotFound);
     }
 
-    await this.offersService.updateById(id, updateOfferDto);
+    return this.offersService.updateById(id, updateOfferDto);
   }
 
+  @ApiResponse({
+    description: 'Возвращает оффер по указанному id',
+    type: Offer,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id оффера',
+    example: '1',
+  })
+  @Get(':id')
+  async findOne(
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.wishesService.findOne({ id });
+  }
+
+  @ApiResponse({
+    status: 201,
+    description: 'Возвращает созданный оффер',
+    type: Offer,
+  })
+  @ApiBody({
+    description: 'Данные оффера',
+    type: CreateOfferRequestDto,
+  })
   @Post()
   async create(
     @Req() req: Request & { user: { id: number } },
@@ -94,7 +146,6 @@ export class OffersController {
 
     // TODO: обернуть в транзакции на случай ошибок
     // TODO: математические операции с деньгами (кейсы копеек)
-    // TODO: модели запросов / ответов
 
     await this.wishesService.updateById(itemId, { raised });
 
@@ -121,8 +172,12 @@ export class OffersController {
     // }
   }
 
+  @ApiResponse({
+    description: 'Возвращает список всех офферов',
+    type: [Offer],
+  })
   @Get()
   findAll(): Promise<Offer[]> {
-    return this.offersService.findAll();
+    return this.offersService.findMany({});
   }
 }

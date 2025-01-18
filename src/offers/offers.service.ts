@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
@@ -13,27 +18,42 @@ export class OffersService {
     private offersRepository: Repository<Offer>,
   ) {}
 
-  async findAll(): Promise<Offer[]> {
-    return this.offersRepository.find();
+  async findOne(
+    options: FindOptionsWhere<Offer>,
+    fields?: FindOptionsSelect<Offer>,
+    join?: FindOptionsRelations<Offer>,
+  ): Promise<Offer> {
+    return this.offersRepository.findOne({
+      where: options,
+      select: fields,
+      relations: join,
+    });
   }
 
-  async findOne(options: FindOneOptions): Promise<Offer> {
-    return this.offersRepository.findOne(options);
-  }
-
-  async findOneById(id: number): Promise<Offer> {
-    return this.offersRepository.findOneBy({ id });
+  async findMany(
+    options: FindOptionsWhere<Offer>,
+    take?: number,
+    order?: FindOptionsOrder<Offer>,
+  ): Promise<Offer[]> {
+    return this.offersRepository.find({
+      where: options,
+      take,
+      order,
+    });
   }
 
   async create(createOfferDto: CreateOfferDto): Promise<Offer> {
     return this.offersRepository.save(createOfferDto);
   }
 
-  async removeById(id: number) {
-    return this.offersRepository.delete({ id });
+  async updateById(id: number, updateOfferDto: UpdateOfferDto) {
+    return this.offersRepository.save({
+      ...updateOfferDto,
+      id,
+    });
   }
 
-  async updateById(id: number, updateOfferDto: UpdateOfferDto) {
-    return this.offersRepository.update({ id }, updateOfferDto);
+  async removeById(id: number) {
+    return this.offersRepository.delete({ id });
   }
 }
