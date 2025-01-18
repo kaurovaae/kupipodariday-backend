@@ -221,18 +221,6 @@ export class WishesController {
 
     const { owner, offers, ...rest } = wish;
 
-    if (wish.owner.id === req.user.id) {
-      // Для своих подарков: название, изображение и ссылка на товар,
-      // прогресс сбора средств и список участников
-      return {
-        ...rest,
-        offers,
-        owner,
-      };
-    }
-
-    // Для чужих подарков: отображение описания подарка, а также тех,
-    // кто скидывается и по сколько (если участник не захотел скрыть сумму вклада).
     return {
       ...rest,
       owner,
@@ -240,7 +228,7 @@ export class WishesController {
         createdAt: offer.createdAt,
         name: offer.user.username,
         amount: offer.hidden ? '***' : offer.amount,
-        img: offer.user.avatar,
+        avatar: offer.user.avatar,
       })),
     };
   }
