@@ -12,12 +12,16 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { WishlistsService } from './wishlists.service';
 import { CreateWishlistRequestDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { FindWishlistDto } from './dto/find-wishlist.dto';
 import { Wishlist } from './entities/wishlist.entity';
 import { JwtGuard } from '../guards/jwt.guard';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
@@ -43,9 +47,18 @@ export class WishlistsController {
     private usersService: UsersService,
   ) {}
 
+  @ApiResponse({
+    status: 200,
+    description: 'Удаляет вишлист с заданным id',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id вишлиста',
+    example: '1',
+  })
   @Delete(':id')
   async removeById(@Param('id', ParseIntPipe) id: number) {
-    const wishlist = await this.wishlistsService.findOneById(id);
+    const wishlist = await this.wishlistsService.findOne({ id });
 
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
@@ -54,35 +67,58 @@ export class WishlistsController {
     await this.wishlistsService.removeById(id);
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'Обновляет данные вишлиста с заданным id',
+    type: Wishlist,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id вишлиста',
+    example: '1',
+  })
+  @ApiBody({
+    description: 'Изменяемые данные вишлиста',
+    type: UpdateWishlistDto,
+  })
   @Patch(':id')
   async updateById(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishlist = await this.wishlistsService.findOneById(id);
+    const wishlist = await this.wishlistsService.findOne({ id });
 
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
     }
 
-    await this.wishlistsService.updateById(id, updateWishlistDto);
+    return this.wishlistsService.updateById(id, updateWishlistDto);
   }
 
+  @ApiResponse({
+    description: 'Возвращает вишлист по указанному id',
+    type: FindWishlistDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Id вишлиста',
+    example: '1',
+  })
   @Get(':id')
-  async findById(@Param('id', ParseIntPipe) id: number) {
-    const wishlist = await this.wishlistsService.findOne({
-      where: { id },
-      select: {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const wishlist = await this.wishlistsService.findOne(
+      { id },
+      {
         items: true,
         owner: {
           id: true,
         },
       },
-      relations: {
+      {
         items: true,
         owner: true,
       },
-    });
+    );
 
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
@@ -91,6 +127,15 @@ export class WishlistsController {
     return wishlist;
   }
 
+  @ApiResponse({
+    status: 201,
+    description: 'Возвращает созданный вишлист',
+    type: Wishlist,
+  })
+  @ApiBody({
+    description: 'Данные вишлиста',
+    type: CreateWishlistRequestDto,
+  })
   @Post()
   async create(
     @Req() req: Request & { user: { id: number } },
@@ -123,6 +168,10 @@ export class WishlistsController {
     });
   }
 
+  @ApiResponse({
+    description: 'Возвращает список всех вишлистов',
+    type: [Wishlist],
+  })
   @Get()
   findAll(): Promise<Wishlist[]> {
     return this.wishlistsService.findMany({});

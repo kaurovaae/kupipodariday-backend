@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { FindManyOptions } from 'typeorm/find-options/FindManyOptions';
-import { FindOneOptions } from 'typeorm/find-options/FindOneOptions';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
@@ -14,27 +18,43 @@ export class WishlistsService {
     private wishlistsRepository: Repository<Wishlist>,
   ) {}
 
-  async findMany(options: FindManyOptions<Wishlist>): Promise<Wishlist[]> {
-    return this.wishlistsRepository.find(options);
+  async findOne(
+    options: FindOptionsWhere<Wishlist>,
+    fields?: FindOptionsSelect<Wishlist>,
+    join?: FindOptionsRelations<Wishlist>,
+  ): Promise<Wishlist> {
+    return this.wishlistsRepository.findOne({
+      where: options,
+      select: fields,
+      relations: join,
+    });
   }
 
-  async findOne(options: FindOneOptions<Wishlist>): Promise<Wishlist> {
-    return this.wishlistsRepository.findOne(options);
-  }
-
-  async findOneById(id: number): Promise<Wishlist> {
-    return this.wishlistsRepository.findOneBy({ id });
+  async findMany(
+    options: FindOptionsWhere<Wishlist>,
+    take?: number,
+    order?: FindOptionsOrder<Wishlist>,
+  ): Promise<Wishlist[]> {
+    return this.wishlistsRepository.find({
+      where: options,
+      take,
+      order,
+    });
   }
 
   async create(createWishlistDto: CreateWishlistDto): Promise<Wishlist> {
     return this.wishlistsRepository.save(createWishlistDto);
   }
 
-  async removeById(id: number) {
-    return this.wishlistsRepository.delete({ id });
+  async updateById(
+    id: number,
+    updateWishlistDto: UpdateWishlistDto,
+  ): Promise<Wishlist> {
+    await this.wishlistsRepository.update({ id }, updateWishlistDto);
+    return this.wishlistsRepository.findOneBy({ id });
   }
 
-  async updateById(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return this.wishlistsRepository.update({ id }, updateWishlistDto);
+  async removeById(id: number) {
+    return this.wishlistsRepository.delete({ id });
   }
 }

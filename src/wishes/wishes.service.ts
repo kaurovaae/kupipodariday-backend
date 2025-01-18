@@ -52,7 +52,6 @@ export class WishesService {
   }
 
   async removeById(id: number) {
-    // TODO: delete relations
     return this.wishesRepository.delete({ id });
   }
 }

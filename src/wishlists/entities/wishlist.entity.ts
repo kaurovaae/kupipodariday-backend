@@ -59,7 +59,7 @@ export class Wishlist {
   @Column()
   image: string;
 
-  @ManyToOne(() => User, (user) => user.wishlists)
+  @ManyToOne(() => User, (user) => user.wishlists, { onDelete: 'CASCADE' })
   owner: User; // ссылка на пользователя, который добавил список пожеланий
 
   @ManyToMany(() => Wish, (wish) => wish.wishlists)

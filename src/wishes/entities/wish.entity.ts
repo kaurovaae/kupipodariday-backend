@@ -82,7 +82,7 @@ export class Wish {
   })
   raised: number;
 
-  @ManyToOne(() => User, (user) => user.wishes)
+  @ManyToOne(() => User, (user) => user.wishes, { onDelete: 'CASCADE' })
   owner: User; // ссылка на пользователя, который добавил пожелание подарка
 
   @ApiProperty({
