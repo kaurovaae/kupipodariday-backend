@@ -14,12 +14,13 @@ import {
   IsString,
   Length,
   IsOptional,
-  //
+  IsPositive,
 } from 'class-validator';
 import { User } from '../../users/entities/user.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
+import { ColumnNumericTransformer } from '../../transformers/column-numeric-transformer';
 
 @Entity()
 export class Wish {
@@ -63,9 +64,12 @@ export class Wish {
     description: 'Стоимость подарка',
     example: 5000,
   })
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Column('decimal', {
+  @IsPositive()
+  @Column('numeric', {
+    precision: 7,
     scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: 0,
   })
   price: number;
 
@@ -75,10 +79,12 @@ export class Wish {
     example: 200.55,
   })
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Column('decimal', {
-    default: 0,
+  @IsNumber()
+  @Column('numeric', {
+    precision: 7,
     scale: 2,
+    transformer: new ColumnNumericTransformer(),
+    default: 0,
   })
   raised: number;
 
