@@ -142,7 +142,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Возвращает пользователя с указанными email или username',
-    type: User,
+    type: [FindUserDto],
   })
   @ApiBody({
     description: 'Имя или email пользователя',
@@ -190,6 +190,7 @@ export class UsersController {
   })
   @Patch(':id')
   async updateById(
+    @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
@@ -197,6 +198,10 @@ export class UsersController {
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
+    }
+
+    if (user.id !== req.user.id) {
+      throw new ServerException(ErrorCode.ConflictUpdateOtherProfile);
     }
 
     await this.usersService.updateById(id, updateUserDto);

@@ -13,21 +13,23 @@ export enum ErrorCode {
   TooMuchMoney = 109,
   EmptyItemsId = 110,
   WishesNotFound = 111,
+  ConflictUpdateOtherProfile = 112,
 }
 
 export const code2message = new Map<ErrorCode, string>([
-  [ErrorCode.LoginOrPasswordIncorrect, 'Login or password is incorrect'],
-  [ErrorCode.UserAlreadyExists, 'User already exists'],
+  [ErrorCode.LoginOrPasswordIncorrect, 'Некорректный логин или пароль'],
+  [ErrorCode.UserAlreadyExists, 'Пользователь уже существует'],
   [ErrorCode.Unauthorized, 'Unauthorized'],
-  [ErrorCode.UserNotFound, 'User not found'],
+  [ErrorCode.UserNotFound, 'Пользователь не найден'],
   [ErrorCode.NotFound, 'Not found'],
-  [ErrorCode.WishNotFound, 'Wish not found'],
-  [ErrorCode.OfferNotFound, 'Offer not found'],
-  [ErrorCode.WishlistNotFound, 'Wishlist not found'],
+  [ErrorCode.WishNotFound, 'Подарок не найден'],
+  [ErrorCode.OfferNotFound, 'Заявка не найдена'],
+  [ErrorCode.WishlistNotFound, 'Вишлист не найден'],
   [ErrorCode.Conflict, 'Conflict'],
   [ErrorCode.TooMuchMoney, 'Сумма заявки больше чем осталось собрать'],
   [ErrorCode.EmptyItemsId, 'Отсутствует itemsId'],
-  [ErrorCode.WishesNotFound, 'Wishes not found'],
+  [ErrorCode.WishesNotFound, 'Подарки с указанными id не найдены'],
+  [ErrorCode.ConflictUpdateOtherProfile, 'Нельзя редактировать чужой профиль'],
 ]);
 
 export const code2status = new Map<ErrorCode, HttpStatus>([
@@ -43,4 +45,5 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.TooMuchMoney, HttpStatus.CONFLICT],
   [ErrorCode.EmptyItemsId, HttpStatus.BAD_REQUEST],
   [ErrorCode.WishesNotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.ConflictUpdateOtherProfile, HttpStatus.BAD_REQUEST],
 ]);

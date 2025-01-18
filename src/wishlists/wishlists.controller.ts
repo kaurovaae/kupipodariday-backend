@@ -57,11 +57,23 @@ export class WishlistsController {
     example: '1',
   })
   @Delete(':id')
-  async removeById(@Param('id', ParseIntPipe) id: number) {
-    const wishlist = await this.wishlistsService.findOne({ id });
+  async removeById(
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const wishlist = await this.wishlistsService.findOne(
+      { id },
+      { owner: { id: true } },
+      { owner: true },
+    );
 
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
+    }
+
+    if (wishlist.owner?.id !== req.user.id) {
+      // Пользователь может удалить только свой вишлист
+      throw new ServerException(ErrorCode.Conflict);
     }
 
     await this.wishlistsService.removeById(id);
@@ -83,13 +95,23 @@ export class WishlistsController {
   })
   @Patch(':id')
   async updateById(
+    @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishlistDto: UpdateWishlistDto,
   ) {
-    const wishlist = await this.wishlistsService.findOne({ id });
+    const wishlist = await this.wishlistsService.findOne(
+      { id },
+      { owner: { id: true } },
+      { owner: true },
+    );
 
     if (!wishlist) {
       throw new ServerException(ErrorCode.WishlistNotFound);
+    }
+
+    if (wishlist.owner?.id !== req.user.id) {
+      // Пользователь может отредактировать только свой вишлист
+      throw new ServerException(ErrorCode.Conflict);
     }
 
     return this.wishlistsService.updateById(id, updateWishlistDto);

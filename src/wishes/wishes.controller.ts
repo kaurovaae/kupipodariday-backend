@@ -27,7 +27,7 @@ import {
   TopWishResponseDto,
 } from './dto/find-wish.dto';
 import { CreateWishRequestDto } from './dto/create-wish.dto';
-import { UpdateWishDto } from './dto/update-wish.dto';
+import { UpdateWishRequestDto } from './dto/update-wish.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
@@ -132,15 +132,24 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOne({ id });
+    const wish = await this.wishesService.findOne(
+      { id },
+      { owner: { id: true } },
+      { owner: true },
+    );
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
     }
 
-    if (wish.owner.id !== req.user.id || wish.raised > 0) {
-      // Пользователь может удалить только свой подарок,
-      // если только никто ещё не решил скинуться
+    if (wish.owner?.id !== req.user.id) {
+      // Пользователь может удалить только свой (!) подарок
+      throw new ServerException(ErrorCode.Conflict);
+    }
+
+    if (wish.raised > 0) {
+      // Пользователь может удалить подарок
+      // только если никто ещё не решил скинуться
       throw new ServerException(ErrorCode.Conflict);
     }
 
@@ -159,23 +168,32 @@ export class WishesController {
   })
   @ApiBody({
     description: 'Изменяемые данные подарка',
-    type: UpdateWishDto,
+    type: UpdateWishRequestDto,
   })
   @Patch(':id')
   async updateById(
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateWishDto: UpdateWishDto,
+    @Body() updateWishDto: UpdateWishRequestDto,
   ) {
-    const wish = await this.wishesService.findOne({ id });
+    const wish = await this.wishesService.findOne(
+      { id },
+      { owner: { id: true } },
+      { owner: true },
+    );
 
     if (!wish) {
       throw new ServerException(ErrorCode.WishNotFound);
     }
 
-    if (wish.owner.id !== req.user.id || wish.raised > 0) {
-      // Пользователь может отредактировать описание своих подарков и стоимость,
-      // если только никто ещё не решил скинуться
+    if (wish.owner?.id !== req.user.id) {
+      // Пользователь может отредактировать описание своего (!) подарка
+      throw new ServerException(ErrorCode.Conflict);
+    }
+
+    if (updateWishDto.price && wish.raised > 0) {
+      // Пользователь может отредактировать стоимость
+      // только если никто ещё не решил скинуться
       throw new ServerException(ErrorCode.Conflict);
     }
 
