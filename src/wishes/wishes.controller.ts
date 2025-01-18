@@ -144,7 +144,7 @@ export class WishesController {
 
     if (wish.owner?.id !== req.user.id) {
       // Пользователь может удалить только свой (!) подарок
-      throw new ServerException(ErrorCode.Conflict);
+      throw new ServerException(ErrorCode.ConflictDeleteOtherWish);
     }
 
     if (wish.raised > 0) {
@@ -188,13 +188,13 @@ export class WishesController {
 
     if (wish.owner?.id !== req.user.id) {
       // Пользователь может отредактировать описание своего (!) подарка
-      throw new ServerException(ErrorCode.Conflict);
+      throw new ServerException(ErrorCode.ConflictUpdateOtherWish);
     }
 
     if (updateWishDto.price && wish.raised > 0) {
       // Пользователь может отредактировать стоимость
       // только если никто ещё не решил скинуться
-      throw new ServerException(ErrorCode.Conflict);
+      throw new ServerException(ErrorCode.ConflictUpdateWishPrice);
     }
 
     return this.wishesService.updateById(id, updateWishDto);

@@ -6,14 +6,24 @@ export enum ErrorCode {
   UserNotFound = 102,
   Unauthorized = 103,
   NotFound = 104,
-  WishNotFound = 105,
-  OfferNotFound = 106,
-  WishlistNotFound = 107,
-  Conflict = 108,
+  Conflict = 105,
+
+  WishNotFound = 106,
+  WishesNotFound = 107,
+  ConflictUpdateWishPrice = 108,
   TooMuchMoney = 109,
-  EmptyItemsId = 110,
-  WishesNotFound = 111,
-  ConflictUpdateOtherProfile = 112,
+
+  WishlistNotFound = 110,
+
+  OfferNotFound = 111,
+  EmptyItemsId = 112,
+
+  ConflictUpdateOtherProfile = 113,
+  ConflictDeleteOtherProfile = 114,
+  ConflictUpdateOtherWish = 115,
+  ConflictDeleteOtherWish = 116,
+  ConflictUpdateOtherWishlist = 117,
+  ConflictDeleteOtherWishlist = 118,
 }
 
 export const code2message = new Map<ErrorCode, string>([
@@ -30,6 +40,12 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.EmptyItemsId, 'Отсутствует itemsId'],
   [ErrorCode.WishesNotFound, 'Подарки с указанными id не найдены'],
   [ErrorCode.ConflictUpdateOtherProfile, 'Нельзя редактировать чужой профиль'],
+  [ErrorCode.ConflictDeleteOtherProfile, 'Нельзя удалить чужой профиль'],
+  [ErrorCode.ConflictUpdateOtherWish, 'Нельзя редактировать чужой подарок'],
+  [ErrorCode.ConflictDeleteOtherWish, 'Нельзя удалить чужой подарок'],
+  [ErrorCode.ConflictUpdateOtherWishlist, 'Нельзя редактировать чужой вишлист'],
+  [ErrorCode.ConflictDeleteOtherWishlist, 'Нельзя удалить чужой вишлист'],
+  [ErrorCode.ConflictUpdateWishPrice, 'Нельзя изменить стоимость подарка'],
 ]);
 
 export const code2status = new Map<ErrorCode, HttpStatus>([
@@ -46,4 +62,10 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.EmptyItemsId, HttpStatus.BAD_REQUEST],
   [ErrorCode.WishesNotFound, HttpStatus.NOT_FOUND],
   [ErrorCode.ConflictUpdateOtherProfile, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictDeleteOtherProfile, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictUpdateOtherWish, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictDeleteOtherWish, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictUpdateOtherWishlist, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictDeleteOtherWishlist, HttpStatus.BAD_REQUEST],
+  [ErrorCode.ConflictUpdateWishPrice, HttpStatus.BAD_REQUEST],
 ]);

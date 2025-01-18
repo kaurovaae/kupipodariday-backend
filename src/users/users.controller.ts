@@ -2,14 +2,14 @@ import { Request } from 'express';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
   UseGuards,
-  ParseIntPipe,
-  Delete,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -165,11 +165,18 @@ export class UsersController {
     example: '1',
   })
   @Delete(':id')
-  async removeById(@Param('id', ParseIntPipe) id: number) {
+  async removeById(
+    @Req() req: Request & { user: { id: number } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     const user = await this.usersService.findOne({ id });
 
     if (!user) {
       throw new ServerException(ErrorCode.UserNotFound);
+    }
+
+    if (user.id !== req.user.id) {
+      throw new ServerException(ErrorCode.ConflictDeleteOtherProfile);
     }
 
     await this.usersService.removeById(id);

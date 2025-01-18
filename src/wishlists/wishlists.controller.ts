@@ -73,7 +73,7 @@ export class WishlistsController {
 
     if (wishlist.owner?.id !== req.user.id) {
       // Пользователь может удалить только свой вишлист
-      throw new ServerException(ErrorCode.Conflict);
+      throw new ServerException(ErrorCode.ConflictDeleteOtherWishlist);
     }
 
     await this.wishlistsService.removeById(id);
@@ -111,7 +111,7 @@ export class WishlistsController {
 
     if (wishlist.owner?.id !== req.user.id) {
       // Пользователь может отредактировать только свой вишлист
-      throw new ServerException(ErrorCode.Conflict);
+      throw new ServerException(ErrorCode.ConflictUpdateOtherWishlist);
     }
 
     return this.wishlistsService.updateById(id, updateWishlistDto);
