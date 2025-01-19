@@ -6,10 +6,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { ErrorCode } from '../exceptions/error-codes';
 import { LocalGuard } from '../guards/local.guard';
 import { UsersService } from '../users/users.service';
-import { ServerException } from '../exceptions/server.exception';
 import { SigninUserDto, SigninUserResponseDto } from './dto/signin-user.dto';
 import { SignupUserDto, SignupUserResponseDto } from './dto/signup-user.dto';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
@@ -63,20 +61,8 @@ export class AuthController {
   async signup(
     @Body() signupUserDto: SignupUserDto,
   ): Promise<SignupUserResponseDto> {
-    const isExists = await this.usersService.findOne({
-      username: signupUserDto.username.toLowerCase(),
-    });
-
-    if (isExists) {
-      throw new ServerException(ErrorCode.UserAlreadyExists);
-    }
-
     /* При регистрации создаём пользователя и генерируем для него токен */
-    const user = await this.usersService.create({
-      ...signupUserDto,
-      username: signupUserDto.username.toLowerCase(),
-      email: signupUserDto.email.toLowerCase(),
-    });
+    const user = await this.usersService.create(signupUserDto);
 
     return this.authService.auth(user.id);
   }

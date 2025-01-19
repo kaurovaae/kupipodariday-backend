@@ -12,6 +12,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { FindUserDto } from './dto/find-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { ServerException } from '../exceptions/server.exception';
+import { ErrorCode } from '../exceptions/error-codes';
 
 @Injectable()
 export class UsersService {
@@ -37,12 +39,31 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { password, ...rest } = createUserDto;
+    const {
+      password,
+      email: reqEmail,
+      username: reqUsername,
+      ...rest
+    } = createUserDto;
+
+    const email = reqEmail.toLowerCase();
+    const username = reqUsername.toLowerCase();
+
+    const isExists = await this.usersRepository.findOne({
+      where: [{ email }, { username }],
+    });
+
+    if (isExists) {
+      throw new ServerException(ErrorCode.UserAlreadyExists);
+    }
+
     const hash = await bcrypt.hash(password, 10);
 
     return this.usersRepository.save({
       ...rest,
       password: hash,
+      email,
+      username,
     });
   }
 
