@@ -39,15 +39,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const {
-      password,
-      email: reqEmail,
-      username: reqUsername,
-      ...rest
-    } = createUserDto;
-
-    const email = reqEmail.toLowerCase();
-    const username = reqUsername.toLowerCase();
+    const { password, email, username, ...rest } = createUserDto;
 
     const isExists = await this.usersRepository.findOne({
       where: [{ email }, { username }],
@@ -71,6 +63,30 @@ export class UsersService {
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<FindUserDto> {
+    const { email, username } = updateUserDto;
+
+    const user = await this.usersRepository.findOneBy({ id });
+
+    // проверяем, что пользователь действительно пытается изменить свои данные
+    // и таких данных не существует у других пользователей
+    if (username && user.username !== username.toLowerCase()) {
+      const isExists = await this.usersRepository.findOneBy({ username });
+
+      if (isExists) {
+        throw new ServerException(ErrorCode.UserAlreadyExists);
+      }
+    }
+
+    // проверяем, что пользователь действительно пытается изменить свои данные
+    // и таких данных не существует у других пользователей
+    if (email && user.email !== email.toLowerCase()) {
+      const isExists = await this.usersRepository.findOneBy({ email });
+
+      if (isExists) {
+        throw new ServerException(ErrorCode.UserAlreadyExists);
+      }
+    }
+
     const { password, ...rest } = updateUserDto;
     if (password) {
       const hash = await bcrypt.hash(password, 10);

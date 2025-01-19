@@ -11,6 +11,7 @@ import { IsEmail, IsString, IsUrl, IsOptional, Length } from 'class-validator';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Wishlist } from '../../wishlists/entities/wishlist.entity';
+import { ColumnLowercaseTransformer } from '../../transformers/column-lowercase-transformer';
 
 @Entity()
 export class User {
@@ -31,6 +32,7 @@ export class User {
   @Length(2, 30)
   @Column({
     unique: true,
+    transformer: new ColumnLowercaseTransformer(),
   })
   username: string; // уникальное имя пользователя
 
@@ -61,6 +63,7 @@ export class User {
   @IsEmail()
   @Column({
     unique: true,
+    transformer: new ColumnLowercaseTransformer(),
   })
   email: string; // уникальный адрес электронной почты пользователя
 
