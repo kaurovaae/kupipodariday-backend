@@ -2,10 +2,8 @@ import { Request } from 'express';
 import {
   Body,
   Controller,
-  // Delete,
   Get,
   Param,
-  // ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -25,15 +23,12 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { NoValidUserResponseDto } from './dto/no-valid-user-response.dto';
 import { User } from './entities/user.entity';
 import { Wish } from '../wishes/entities/wish.entity';
-import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
 import {
   FindOwnUserDto,
   FindUserDto,
   FindUserDtoRequest,
 } from './dto/find-user.dto';
-import { ServerException } from '../exceptions/server.exception';
-import { ErrorCode } from '../exceptions/error-codes';
 
 @ApiBearerAuth()
 @ApiTags('users')
@@ -45,10 +40,7 @@ import { ErrorCode } from '../exceptions/error-codes';
 })
 @Controller('users')
 export class UsersController {
-  constructor(
-    private usersService: UsersService,
-    private wishesService: WishesService,
-  ) {}
+  constructor(private usersService: UsersService) {}
 
   @ApiResponse({
     status: 200,
@@ -57,9 +49,7 @@ export class UsersController {
   })
   @Get('me/wishes')
   async getOwnWishes(@Req() req: Request & { user: { id: number } }) {
-    return this.wishesService.findMany({
-      owner: { id: req.user.id },
-    });
+    return this.usersService.getOwnWishes(req.user.id);
   }
 
   @ApiResponse({
@@ -74,17 +64,7 @@ export class UsersController {
   })
   @Get(':username/wishes')
   async getUserWishes(@Param('username') username: string) {
-    const user = await this.usersService.findOne({
-      username: username.toLowerCase(),
-    });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.UserNotFound);
-    }
-
-    return this.wishesService.findMany({
-      owner: { id: user.id },
-    });
+    return this.usersService.getUserWishes(username.toLowerCase());
   }
 
   @ApiResponse({
@@ -154,73 +134,4 @@ export class UsersController {
       where: [{ email: query }, { username: query }],
     });
   }
-
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Удаляет пользователя с заданным id',
-  // })
-  // @ApiParam({
-  //   name: 'id',
-  //   description: 'Id пользователя',
-  //   example: '1',
-  // })
-  // @Delete(':id')
-  // async removeById(
-  //   @Req() req: Request & { user: { id: number } },
-  //   @Param('id', ParseIntPipe) id: number,
-  // ) {
-  //   const user = await this.usersService.findOne({ id });
-  //
-  //   if (!user) {
-  //     throw new ServerException(ErrorCode.UserNotFound);
-  //   }
-  //
-  //   if (user.id !== req.user.id) {
-  //     throw new ServerException(ErrorCode.ConflictDeleteOtherProfile);
-  //   }
-  //
-  //   await this.usersService.removeById(id);
-  // }
-
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Обновляет данные пользователя с заданным id',
-  // })
-  // @ApiParam({
-  //   name: 'id',
-  //   description: 'Id пользователя',
-  //   example: '1',
-  // })
-  // @ApiBody({
-  //   description: 'Изменяемые данные пользователя',
-  //   type: UpdateUserDto,
-  // })
-  // @Patch(':id')
-  // async updateById(
-  //   @Req() req: Request & { user: { id: number } },
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() updateUserDto: UpdateUserDto,
-  // ) {
-  //   const user = await this.usersService.findOne({ id });
-  //
-  //   if (!user) {
-  //     throw new ServerException(ErrorCode.UserNotFound);
-  //   }
-  //
-  //   if (user.id !== req.user.id) {
-  //     throw new ServerException(ErrorCode.ConflictUpdateOtherProfile);
-  //   }
-  //
-  //   await this.usersService.updateById(id, updateUserDto);
-  // }
-
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Возвращает список существующих пользователей',
-  //   type: [FindUserDto],
-  // })
-  // @Get()
-  // findAll(): Promise<FindUserDto[]> {
-  //   return this.usersService.findMany({});
-  // }
 }

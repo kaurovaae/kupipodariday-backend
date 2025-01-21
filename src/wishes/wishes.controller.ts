@@ -29,10 +29,7 @@ import {
 import { CreateWishRequestDto } from './dto/create-wish.dto';
 import { UpdateWishRequestDto } from './dto/update-wish.dto';
 import { JwtGuard } from '../guards/jwt.guard';
-import { ServerException } from '../exceptions/server.exception';
-import { ErrorCode } from '../exceptions/error-codes';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
-import { UsersService } from '../users/users.service';
 
 const TOP_WISHES_COUNT = Object.freeze(20);
 const LAST_WISHES_COUNT = Object.freeze(40);
@@ -46,10 +43,7 @@ const LAST_WISHES_COUNT = Object.freeze(40);
 })
 @Controller('wishes')
 export class WishesController {
-  constructor(
-    private wishesService: WishesService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private wishesService: WishesService) {}
 
   @ApiResponse({
     status: 200,
@@ -90,32 +84,7 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const user = await this.usersService.findOne({ id: req.user.id });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
-    const wish = await this.wishesService.findOne({ id });
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    await this.wishesService.updateById(id, {
-      copied: wish.copied + 1,
-    });
-
-    return this.wishesService.create({
-      name: wish.name,
-      link: wish.link,
-      image: wish.image,
-      price: wish.price,
-      description: wish.description,
-      raised: 0,
-      owner: user,
-      wishlists: [],
-    });
+    return this.wishesService.copyWish(req.user.id, id);
   }
 
   @ApiResponse({
@@ -132,28 +101,7 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOne(
-      { id },
-      { owner: { id: true } },
-      { owner: true },
-    );
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    if (wish.owner?.id !== req.user.id) {
-      // Пользователь может удалить только свой (!) подарок
-      throw new ServerException(ErrorCode.ConflictDeleteOtherWish);
-    }
-
-    if (wish.raised > 0) {
-      // Пользователь может удалить подарок
-      // только если никто ещё не решил скинуться
-      throw new ServerException(ErrorCode.Conflict);
-    }
-
-    await this.wishesService.removeById(id);
+    await this.wishesService.removeWish(req.user.id, id);
   }
 
   @ApiResponse({
@@ -176,28 +124,7 @@ export class WishesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateWishDto: UpdateWishRequestDto,
   ) {
-    const wish = await this.wishesService.findOne(
-      { id },
-      { owner: { id: true } },
-      { owner: true },
-    );
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    if (wish.owner?.id !== req.user.id) {
-      // Пользователь может отредактировать описание своего (!) подарка
-      throw new ServerException(ErrorCode.ConflictUpdateOtherWish);
-    }
-
-    if (updateWishDto.price && wish.raised > 0) {
-      // Пользователь может отредактировать стоимость
-      // только если никто ещё не решил скинуться
-      throw new ServerException(ErrorCode.ConflictUpdateWishPrice);
-    }
-
-    return this.wishesService.updateById(id, updateWishDto);
+    return this.wishesService.updateWish(req.user.id, id, updateWishDto);
   }
 
   @ApiResponse({
@@ -214,39 +141,7 @@ export class WishesController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    const wish = await this.wishesService.findOne(
-      { id },
-      {
-        owner: {
-          id: true,
-          avatar: true,
-          username: true,
-        },
-      },
-      {
-        owner: true,
-        offers: {
-          user: true,
-        },
-      },
-    );
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    const { owner, offers, ...rest } = wish;
-
-    return {
-      ...rest,
-      owner,
-      offers: offers.map((offer) => ({
-        createdAt: offer.createdAt,
-        name: offer.user.username,
-        amount: offer.hidden ? '***' : offer.amount,
-        avatar: offer.user.avatar,
-      })),
-    };
+    return this.wishesService.findWish(id);
   }
 
   @ApiResponse({
@@ -261,30 +156,8 @@ export class WishesController {
   @Post()
   async create(
     @Req() req: Request & { user: { id: number } },
-    @Body() wish: CreateWishRequestDto,
+    @Body() createWishDto: CreateWishRequestDto,
   ): Promise<Wish> {
-    const user = await this.usersService.findOne({ id: req.user.id });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
-    if (wish.raised && wish.raised > wish.price) {
-      throw new ServerException(ErrorCode.WishRaisedIsRatherThanPrice);
-    }
-
-    return this.wishesService.create({
-      ...wish,
-      owner: user,
-    });
+    return this.wishesService.createWish(req.user.id, createWishDto);
   }
-
-  // @ApiResponse({
-  //   description: 'Возвращает список всех подарков',
-  //   type: [Wish],
-  // })
-  // @Get()
-  // findAll(): Promise<Wish[]> {
-  //   return this.wishesService.findMany({});
-  // }
 }

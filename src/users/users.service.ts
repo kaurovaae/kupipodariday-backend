@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   FindOptionsRelations,
@@ -14,12 +14,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { ServerException } from '../exceptions/server.exception';
 import { ErrorCode } from '../exceptions/error-codes';
+import { WishesService } from '../wishes/wishes.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @Inject(forwardRef(() => WishesService))
+    private wishesService: WishesService,
   ) {}
 
   async findOne(
@@ -101,5 +104,21 @@ export class UsersService {
 
   async removeById(id: number) {
     return this.usersRepository.delete({ id });
+  }
+
+  async getOwnWishes(id: number) {
+    return this.wishesService.findMany({ owner: { id } });
+  }
+
+  async getUserWishes(username: string) {
+    const user = await this.findOne({ username });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+
+    return this.wishesService.findMany({
+      owner: { id: user.id },
+    });
   }
 }
