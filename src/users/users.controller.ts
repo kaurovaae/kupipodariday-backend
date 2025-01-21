@@ -93,7 +93,7 @@ export class UsersController {
     @Req() req: Request & { user: { id: number } },
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    return this.usersService.updateById(req.user.id, updateUserDto);
+    return this.usersService.updateUser(req.user.id, updateUserDto);
   }
 
   @ApiResponse({

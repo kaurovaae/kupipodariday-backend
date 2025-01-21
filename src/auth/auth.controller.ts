@@ -62,7 +62,7 @@ export class AuthController {
     @Body() signupUserDto: SignupUserDto,
   ): Promise<SignupUserResponseDto> {
     /* При регистрации создаём пользователя и генерируем для него токен */
-    const user = await this.usersService.create(signupUserDto);
+    const user = await this.usersService.createUser(signupUserDto);
 
     return this.authService.auth(user.id);
   }

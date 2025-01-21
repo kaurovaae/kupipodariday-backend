@@ -42,6 +42,19 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    return this.usersRepository.save(createUserDto);
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.usersRepository.update({ id }, updateUserDto);
+    return this.usersRepository.findOneBy({ id });
+  }
+
+  async remove(id: number) {
+    return this.usersRepository.delete({ id });
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { password, email, username, ...rest } = createUserDto;
 
     const isExists = await this.usersRepository.findOne({
@@ -54,7 +67,7 @@ export class UsersService {
 
     const hash = await bcrypt.hash(password, 10);
 
-    return this.usersRepository.save({
+    return this.create({
       ...rest,
       password: hash,
       email,
@@ -62,7 +75,7 @@ export class UsersService {
     });
   }
 
-  async updateById(
+  async updateUser(
     id: number,
     updateUserDto: UpdateUserDto,
   ): Promise<FindUserDto> {
@@ -94,16 +107,10 @@ export class UsersService {
     if (password) {
       const hash = await bcrypt.hash(password, 10);
       const user = { ...rest, password: hash };
-      await this.usersRepository.update({ id }, user);
-    } else {
-      await this.usersRepository.update({ id }, updateUserDto);
+      return this.update(id, user);
     }
 
-    return this.usersRepository.findOneBy({ id });
-  }
-
-  async removeById(id: number) {
-    return this.usersRepository.delete({ id });
+    return this.update(id, updateUserDto);
   }
 
   async getOwnWishes(id: number) {

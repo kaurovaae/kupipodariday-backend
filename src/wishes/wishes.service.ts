@@ -51,109 +51,13 @@ export class WishesService {
     return this.wishesRepository.save(createWishDto);
   }
 
-  async updateById(id: number, updateWishDto: UpdateWishDto): Promise<Wish> {
+  async update(id: number, updateWishDto: UpdateWishDto): Promise<Wish> {
     await this.wishesRepository.update({ id }, updateWishDto);
     return this.wishesRepository.findOneBy({ id });
   }
 
-  async removeById(id: number) {
+  async remove(id: number) {
     return this.wishesRepository.delete({ id });
-  }
-
-  async removeWish(userId: number, id: number) {
-    const wish = await this.findOne(
-      { id },
-      { owner: { id: true } },
-      { owner: true },
-    );
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    if (wish.owner?.id !== userId) {
-      // Пользователь может удалить только свой (!) подарок
-      throw new ServerException(ErrorCode.ConflictDeleteOtherWish);
-    }
-
-    if (wish.raised > 0) {
-      // Пользователь может удалить подарок
-      // только если никто ещё не решил скинуться
-      throw new ServerException(ErrorCode.Conflict);
-    }
-
-    return this.removeById(id);
-  }
-
-  async copyWish(userId: number, id: number) {
-    const user = await this.usersService.findOne({ id: userId });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
-    const wish = await this.findOne({ id });
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    await this.updateById(id, {
-      copied: wish.copied + 1,
-    });
-
-    return this.create({
-      name: wish.name,
-      link: wish.link,
-      image: wish.image,
-      price: wish.price,
-      description: wish.description,
-      raised: 0,
-      owner: user,
-      wishlists: [],
-    });
-  }
-
-  async updateWish(userId: number, id: number, updateWishDto: UpdateWishDto) {
-    const wish = await this.findOne(
-      { id },
-      { owner: { id: true } },
-      { owner: true },
-    );
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    if (wish.owner?.id !== userId) {
-      // Пользователь может отредактировать описание своего (!) подарка
-      throw new ServerException(ErrorCode.ConflictUpdateOtherWish);
-    }
-
-    if (updateWishDto.price && wish.raised > 0) {
-      // Пользователь может отредактировать стоимость
-      // только если никто ещё не решил скинуться
-      throw new ServerException(ErrorCode.ConflictUpdateWishPrice);
-    }
-
-    return this.updateById(id, updateWishDto);
-  }
-
-  async createWish(userId: number, createWishDto: CreateWishRequestDto) {
-    const user = await this.usersService.findOne({ id: userId });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
-    if (createWishDto.raised && createWishDto.raised > createWishDto.price) {
-      throw new ServerException(ErrorCode.WishRaisedIsRatherThanPrice);
-    }
-
-    return this.create({
-      ...createWishDto,
-      owner: user,
-    });
   }
 
   async findWish(id: number) {
@@ -190,5 +94,99 @@ export class WishesService {
         avatar: offer.user.avatar,
       })),
     };
+  }
+
+  async createWish(userId: number, createWishDto: CreateWishRequestDto) {
+    const user = await this.usersService.findOne({ id: userId });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    if (createWishDto.raised && createWishDto.raised > createWishDto.price) {
+      throw new ServerException(ErrorCode.WishRaisedIsRatherThanPrice);
+    }
+
+    return this.create({
+      ...createWishDto,
+      owner: user,
+    });
+  }
+
+  async updateWish(userId: number, id: number, updateWishDto: UpdateWishDto) {
+    const wish = await this.findOne(
+      { id },
+      { owner: { id: true } },
+      { owner: true },
+    );
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
+
+    if (wish.owner?.id !== userId) {
+      // Пользователь может отредактировать описание своего (!) подарка
+      throw new ServerException(ErrorCode.ConflictUpdateOtherWish);
+    }
+
+    if (updateWishDto.price && wish.raised > 0) {
+      // Пользователь может отредактировать стоимость
+      // только если никто ещё не решил скинуться
+      throw new ServerException(ErrorCode.ConflictUpdateWishPrice);
+    }
+
+    return this.update(id, updateWishDto);
+  }
+
+  async removeWish(userId: number, id: number) {
+    const wish = await this.findOne(
+      { id },
+      { owner: { id: true } },
+      { owner: true },
+    );
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
+
+    if (wish.owner?.id !== userId) {
+      // Пользователь может удалить только свой (!) подарок
+      throw new ServerException(ErrorCode.ConflictDeleteOtherWish);
+    }
+
+    if (wish.raised > 0) {
+      // Пользователь может удалить подарок
+      // только если никто ещё не решил скинуться
+      throw new ServerException(ErrorCode.Conflict);
+    }
+
+    return this.remove(id);
+  }
+
+  async copyWish(userId: number, id: number) {
+    const user = await this.usersService.findOne({ id: userId });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    const wish = await this.findOne({ id });
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
+
+    await this.update(id, { copied: wish.copied + 1 });
+
+    return this.create({
+      name: wish.name,
+      link: wish.link,
+      image: wish.image,
+      price: wish.price,
+      description: wish.description,
+      raised: 0,
+      owner: user,
+      wishlists: [],
+    });
   }
 }

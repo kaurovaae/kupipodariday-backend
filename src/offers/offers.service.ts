@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   FindOptionsOrder,
   FindOptionsRelations,
@@ -7,14 +7,22 @@ import {
   Repository,
 } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateOfferDto } from './dto/create-offer.dto';
+import { CreateOfferDto, CreateOfferRequestDto } from './dto/create-offer.dto';
 import { Offer } from './entities/offer.entity';
+import { ServerException } from '../exceptions/server.exception';
+import { ErrorCode } from '../exceptions/error-codes';
+import { UsersService } from '../users/users.service';
+import { WishesService } from '../wishes/wishes.service';
 
 @Injectable()
 export class OffersService {
   constructor(
     @InjectRepository(Offer)
     private offersRepository: Repository<Offer>,
+    @Inject(forwardRef(() => UsersService))
+    private usersService: UsersService,
+    @Inject(forwardRef(() => WishesService))
+    private wishesService: WishesService,
   ) {}
 
   async findOne(
@@ -55,4 +63,47 @@ export class OffersService {
   // async removeById(id: number) {
   //   return this.offersRepository.delete({ id });
   // }
+
+  async createOffer(
+    userId: number,
+    createOfferDto: CreateOfferRequestDto,
+  ): Promise<Offer> {
+    const user = await this.usersService.findOne({ id: userId });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.Unauthorized);
+    }
+
+    const wish = await this.wishesService.findOne(
+      { id: createOfferDto.itemId },
+      { owner: { id: true } },
+      { owner: true },
+    );
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
+
+    if (wish.owner?.id === userId) {
+      // Пользователю нельзя вносить деньги на собственные подарки
+      throw new ServerException(ErrorCode.ConflictCreateOwnWishOffer);
+    }
+
+    const { itemId, amount, hidden } = createOfferDto;
+
+    const raised = +wish.raised + +amount;
+
+    if (raised > wish.price) {
+      throw new ServerException(ErrorCode.ConflictUpdateOfferTooMuchMoney);
+    }
+
+    await this.wishesService.update(itemId, { raised });
+
+    return this.create({
+      item: wish,
+      user,
+      amount,
+      hidden,
+    });
+  }
 }

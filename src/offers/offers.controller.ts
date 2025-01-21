@@ -20,13 +20,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { ServerException } from '../exceptions/server.exception';
-import { ErrorCode } from '../exceptions/error-codes';
-import { WishesService } from '../wishes/wishes.service';
 import { JwtGuard } from '../guards/jwt.guard';
 import { NoValidUserResponseDto } from '../users/dto/no-valid-user-response.dto';
 import { FindOfferDto } from './dto/find-offer.dto';
-import { UsersService } from '../users/users.service';
 
 @ApiBearerAuth()
 @ApiTags('offers')
@@ -37,11 +33,7 @@ import { UsersService } from '../users/users.service';
 })
 @Controller('offers')
 export class OffersController {
-  constructor(
-    private offersService: OffersService,
-    private wishesService: WishesService,
-    private usersService: UsersService,
-  ) {}
+  constructor(private offersService: OffersService) {}
 
   @ApiResponse({
     description: 'Возвращает оффер по указанному id',
@@ -57,7 +49,7 @@ export class OffersController {
     @Req() req: Request & { user: { id: number } },
     @Param('id', ParseIntPipe) id: number,
   ) {
-    return this.wishesService.findOne({ id });
+    return this.offersService.findOne({ id });
   }
 
   @ApiResponse({
@@ -74,43 +66,7 @@ export class OffersController {
     @Req() req: Request & { user: { id: number } },
     @Body() offer: CreateOfferRequestDto,
   ): Promise<Offer> {
-    const user = await this.usersService.findOne({ id: req.user.id });
-
-    if (!user) {
-      throw new ServerException(ErrorCode.Unauthorized);
-    }
-
-    const wish = await this.wishesService.findOne(
-      { id: offer.itemId },
-      { owner: { id: true } },
-      { owner: true },
-    );
-
-    if (!wish) {
-      throw new ServerException(ErrorCode.WishNotFound);
-    }
-
-    if (wish.owner?.id === req.user.id) {
-      // Пользователю нельзя вносить деньги на собственные подарки
-      throw new ServerException(ErrorCode.ConflictCreateOwnWishOffer);
-    }
-
-    const { itemId, amount } = offer;
-
-    const raised = +wish.raised + +amount;
-
-    if (raised > wish.price) {
-      throw new ServerException(ErrorCode.ConflictUpdateOfferTooMuchMoney);
-    }
-
-    await this.wishesService.updateById(itemId, { raised });
-
-    return this.offersService.create({
-      item: wish,
-      user: user,
-      amount: offer.amount,
-      hidden: offer.hidden,
-    });
+    return this.offersService.createOffer(req.user.id, offer);
   }
 
   @ApiResponse({
