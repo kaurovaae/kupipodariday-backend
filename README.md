@@ -15,3 +15,8 @@
 - Авторизация с использованием Bearer-token
 - bcrypt для хеширования паролей пользователей
 - @nestjs/swagger для реализации Swagger
+
+## Быстрый старт
+- Склонировать текущий репозиторий
+- Склонировать репозиторий фронтенда: https://github.com/yandex-praktikum/nodejs-kupipodariday-frontend
+- Выполнить команды ```npm i``` и ```npm start``` в обоих проектах
