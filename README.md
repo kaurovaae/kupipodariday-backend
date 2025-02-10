@@ -7,3 +7,9 @@
 ## Используемые технологии и решения
 - NestJS
 - Postgres
+- pg, TypeORM для работы с БД
+- class-validator, class-transformer для валидации
+- Passport.js и стратегии авторизации @nestjs/passport, passport, passport-jwt, passport-local
+- Авторизация с использованием Bearer-token
+- bcrypt для хеширования паролей пользователей
+- @nestjs/swagger для реализации Swagger
